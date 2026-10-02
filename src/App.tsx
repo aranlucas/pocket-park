@@ -220,6 +220,7 @@ export default function App() {
         >
           <span
             className="rings"
+            role="img"
             aria-label={`${state.rings} of 3 rings collected`}
           >
             {[0, 1, 2].map((i) => (
