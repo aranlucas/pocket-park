@@ -1,9 +1,53 @@
-# Pocket-Park
+# Pocket Park
 
-A compact momentum puzzle about making a clean line through a miniature skatepark.
+One push, three rings, a soft landing. A tiny momentum puzzle with five parks and a real Box2D-derived physics simulation.
 
-## Bootstrap status
+## Try it
 
-This main branch intentionally contains only the project brief. The implementation will be reviewed in a separate pull request.
+Adjust launch angle and push, inspect the dotted physical preview, then Take the line. Collect all rings and rest in the bowl. Pause, restart, undo a tweak, or use a reference hint; try another park and keep a local best time.
 
-Planned capability: Planck Box2D physics. Local-first, synthetic demo data, no required keys.
+Requires **Node 24+** and npm. No account, key, model download or external service is needed.
+
+```sh
+npm ci --ignore-scripts
+npm run dev
+```
+
+Vite prints a localhost URL. For a production/offline check:
+
+```sh
+npm run check
+npm run preview
+```
+
+The production build includes a versioned service worker. After the first successful online/local-server load and activation, the bundled app can reopen without a network connection at that origin. Browser storage, file and codec support still apply. Dev mode does not install the offline cache.
+
+## Why this library
+
+Planck 1.5.0 (MIT), imported without its testbed, plus self-hosted Fraunces (OFL). Related non-trending mature library chosen from the creative geometry thread around live OpenCADStudio. It drives real collisions and fixed steps; native geometric art depicts the same fixtures.
+
+Live GitHub Trending evidence was inspected on 2 October 2026 across daily, weekly, monthly and language views. This project does not claim that its core dependency was itself trending or newly released.
+
+## Behavior and limits
+
+This is an abstract puck game, not a realistic skating simulator. Five compact parks share a family of ramps but vary gravity, obstacles and ring trajectories. Ring placement is derived from verified canonical trajectories; hints intentionally reveal those controls. Best times and undo state are local, no global leaderboard. Physics advances at 120 Hz; rendering caps catch-up after hidden-tab stalls. No audio, gamepad or replay export in this prototype.
+
+Local browser storage failures produce a recovery message. Saved progress is validated. Control tweaks can be undone during the current visit. The app makes no external network requests for user data and has no analytics. All parks are synthetic.
+
+## Verification
+
+`npm run check` runs meaningful core tests, strict TypeScript checks and a production build. CI repeats these on Node 24 and audits production dependencies. Runtime pins and the lockfile make installs reproducible; lifecycle scripts are disabled. Desktop/mobile browser evidence and interaction notes are recorded in the implementation PR.
+
+## Deployment configuration
+
+`wrangler.toml` targets Cloudflare static assets; `railway.json` describes a Vite preview process. Both are **configuration only**. Nothing has been provisioned or deployed. Hosting requires a separate decision about access and provider terms.
+
+## Code map
+
+- `src/App.tsx`: state composition and user workflow.
+- Domain modules in `src/`: pure calculations / media / physical rules.
+- Rendering components and `styles.css`: native interface and responsive layout.
+- `tests/`: core behavior and input-boundary regression tests.
+- `scripts/offline.mjs`: build-specific cache manifest.
+
+See `PRODUCT.md`, `DESIGN.md`, `DEPENDENCIES.md` and `SECURITY.md` for the UI coordinator and future reviewers.
