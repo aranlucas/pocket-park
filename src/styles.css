@@ -7,7 +7,7 @@
   --chalk: #fff2c6;
   --violet: #443678;
   --muted: #d0c2e5;
-  --line: #8d7caf;
+  --line: #726193;
   --mint: #a5d5be;
   --coral: #f59383;
 }
@@ -22,10 +22,11 @@ input {
   font: inherit;
 }
 button {
+  min-height: 44px;
   background: transparent;
   border: 1px solid #a795c6;
   color: var(--chalk);
-  padding: 11px 16px;
+  padding: 10px 14px;
   border-radius: 9px;
   cursor: pointer;
   font-weight: 600;
@@ -40,114 +41,127 @@ button:disabled {
 button:focus-visible,
 input:focus-visible {
   outline: 3px solid var(--mint);
-  outline-offset: 4px;
+  outline-offset: 3px;
 }
 ::selection {
   background: var(--coral);
   color: var(--violet);
 }
+/* The scene yields space to the content, never the other way around.
+   Minimum tracks keep zoom/short windows readable and allow page scrolling. */
 .game {
-  max-width: 1600px;
+  max-width: 1440px;
+  height: 100vh;
+  height: 100svh;
   margin: auto;
+  padding: 0 28px;
+  display: flex;
+  flex-direction: column;
   outline: 0;
 }
 header {
-  text-align: center;
-  padding: 32px 20px 4px;
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 24px;
+  padding: 20px 0 12px;
 }
 h1 {
   font-family: Fraunces, Georgia, serif;
   font-weight: 700;
-  font-size: 86px;
+  font-size: clamp(36px, 4vw, 58px);
   letter-spacing: -0.03em;
   line-height: 1.05;
   margin: 0;
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 12px;
 }
 h1 svg {
   color: var(--coral);
-  width: 46px;
-  height: 32px;
+  width: 40px;
+  height: 30px;
 }
 header p {
+  grid-column: 1;
   font-family: Georgia, serif;
-  font-size: 22px;
-  margin: 10px 0 20px;
+  font-size: 17px;
+  margin: 6px 0 0;
 }
 .park-heading {
+  grid-column: 2;
+  grid-row: 1 / 3;
   font-size: 14px;
   color: var(--muted);
   display: flex;
-  justify-content: center;
   gap: 10px;
 }
 main {
-  padding: 0 24px;
+  flex: 1;
+  display: grid;
+  grid-template-rows: minmax(220px, 1fr) auto auto auto;
+  min-height: min-content;
+}
+.scene {
+  width: 100%;
+  position: relative;
+  min-width: 0;
 }
 .playfield {
-  width: 100%;
+  position: absolute;
+  inset: 0;
   display: block;
-  aspect-ratio: 960/450;
-  margin-top: 4px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
 }
 .controls {
-  border-top: 1px solid #726193;
-  display: flex;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
   align-items: center;
-  gap: 30px;
-  padding: 26px 12px;
+  gap: 24px;
+  padding: 16px 0;
 }
 .controls > label {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 13px;
-  font:
-    19px Georgia,
-    serif;
-  flex: 1;
-  min-width: 130px;
-  max-width: 280px;
+  align-items: center;
+  column-gap: 8px;
+  font: 18px Georgia, serif;
+  min-width: 0;
 }
 .controls label strong {
-  font:
-    24px Georgia,
-    serif;
-  font-weight: 700;
+  font: bold 22px Georgia, serif;
 }
 .controls input {
-  grid-column: 1/3;
+  grid-column: 1 / 3;
   width: 100%;
+  min-width: 0;
+  height: 28px;
   accent-color: var(--chalk);
   cursor: ew-resize;
   margin: 0;
 }
 .controls label > div {
-  grid-column: 1/3;
+  grid-column: 1 / 3;
   display: flex;
   justify-content: space-between;
   color: var(--muted);
-  font:
-    11px -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+  font: 12px -apple-system, BlinkMacSystemFont, sans-serif;
 }
 .take {
-  font:
-    24px Fraunces,
-    Georgia,
-    serif;
-  font-weight: 700;
+  font: bold 24px Fraunces, Georgia, serif;
   background: var(--chalk);
   color: var(--violet);
   border-color: var(--chalk);
-  padding: 18px 26px;
+  padding: 14px 22px;
   display: flex;
   gap: 18px;
   align-items: center;
-  white-space: nowrap;
+  justify-content: center;
 }
 .take:hover {
   background: #f2dba2;
@@ -155,21 +169,19 @@ main {
 .secondary {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
-  max-width: 230px;
-  justify-content: flex-end;
 }
 .secondary button {
   font-size: 13px;
-  padding: 10px 13px;
+  padding: 10px;
 }
 .result {
-  border-top: 1px solid #726193;
+  border-top: 1px solid var(--line);
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 23px 12px;
-  min-height: 82px;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 0;
+  min-height: 65px;
 }
 .rings {
   display: flex;
@@ -177,10 +189,8 @@ main {
   flex-shrink: 0;
 }
 .result p {
-  font-family: Georgia, serif;
-  font-size: 18px;
+  font: 17px/1.4 Georgia, serif;
   margin: 0;
-  line-height: 1.4;
 }
 .best {
   margin-left: auto;
@@ -193,7 +203,6 @@ main {
   background: var(--mint);
   color: #243c32;
   border-color: var(--mint);
-  white-space: nowrap;
 }
 .landed p {
   color: var(--mint);
@@ -204,17 +213,18 @@ main {
 }
 footer {
   display: flex;
-  gap: 24px;
+  gap: 20px;
   align-items: center;
-  padding: 17px 12px 28px;
-  border-top: 1px solid #726193;
+  padding: 12px 0 16px;
+  border-top: 1px solid var(--line);
 }
 .parks {
   display: flex;
   gap: 8px;
 }
 .parks button {
-  padding: 9px 13px;
+  min-width: 44px;
+  padding: 8px;
   position: relative;
   font-variant-numeric: tabular-nums;
 }
@@ -242,159 +252,159 @@ footer p {
 }
 footer small {
   display: block;
-  font-size: 11px;
-  margin-top: 5px;
+  font-size: 12px;
+  margin-top: 3px;
 }
 .hint {
-  font-size: 12px;
-  padding: 9px 13px;
+  font-size: 13px;
 }
 .notice {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
   background: #5c4d8c;
-  padding: 10px 20px;
-  margin: 14px 24px 0;
+  padding: 4px 12px;
   border-radius: 6px;
   font-size: 13px;
 }
 .notice button {
   border: 0;
+  min-width: 44px;
   padding: 2px 6px;
   font-size: 20px;
 }
-@media (max-width: 1000px) {
-  h1 {
-    font-size: 66px;
-  }
+@media (max-width: 1100px) {
   .controls {
-    gap: 20px;
-    flex-wrap: wrap;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+    padding: 12px 0;
   }
   .take {
-    margin-left: auto;
-    font-size: 21px;
-    padding: 16px 22px;
+    font-size: 22px;
+    padding: 10px 16px;
   }
   .secondary {
-    max-width: none;
-    flex-basis: 100%;
-    justify-content: center;
+    justify-content: stretch;
   }
-  .controls > label {
-    max-width: none;
-  }
-  .result {
-    flex-wrap: wrap;
-  }
-  .result p {
-    font-size: 17px;
-  }
-  .next {
-    margin-left: auto;
-  }
-  footer {
-    gap: 15px;
+  .secondary button {
+    flex: 1;
   }
 }
 @media (max-width: 600px) {
+  .game {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100svh;
+    padding: 0 12px;
+    justify-content: center;
+  }
   header {
-    padding: 28px 12px 12px;
+    display: block;
+    text-align: center;
+    padding: 8px 0 6px;
   }
   h1 {
-    font-size: 43px;
+    font-size: 36px;
+    justify-content: center;
     gap: 8px;
   }
   h1 svg {
     width: 29px;
+    height: 24px;
   }
   header p {
-    font-size: 16px;
-    margin: 10px 0 14px;
+    font-size: 15px;
+    margin: 2px 0 4px;
   }
   .park-heading {
+    justify-content: center;
     font-size: 12px;
+    gap: 8px;
   }
   main {
-    padding: 0 12px;
+    flex: none;
+    grid-template-rows: auto auto auto auto;
   }
-  .playfield {
-    margin: 10px 0 0;
-    min-height: 240px;
-    object-fit: contain;
+  .scene {
+    min-height: 160px;
+    aspect-ratio: 960 / 450;
   }
   .controls {
-    gap: 19px;
-    padding: 20px 8px;
+    gap: 6px 16px;
+    padding: 8px 0;
   }
   .controls > label {
-    min-width: 110px;
     font-size: 15px;
   }
   .controls label strong {
-    font-size: 21px;
+    font-size: 20px;
+  }
+  .take,
+  .secondary {
+    grid-column: 1 / 3;
   }
   .take {
-    width: 100%;
-    justify-content: center;
-    font-size: 22px;
-  }
-  .secondary {
-    justify-content: space-between;
-    gap: 8px;
+    font-size: 21px;
+    padding: 8px 14px;
   }
   .secondary button {
-    flex: 1;
+    min-height: 40px;
     font-size: 12px;
+    padding: 8px;
   }
   .result {
-    padding: 20px 5px;
-    gap: 10px;
+    gap: 4px 10px;
+    padding: 6px 0;
+    min-height: 56px;
   }
   .result p {
-    order: 2;
+    order: 1;
     flex-basis: 100%;
-    font-size: 17px;
+    font-size: 15px;
   }
   .rings svg {
     width: 19px;
     height: 19px;
   }
-  .best {
-    font-size: 11px;
-  }
   .next {
-    order: 3;
-    width: 100%;
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  .complete {
+    order: 2;
   }
   footer {
     flex-wrap: wrap;
-    padding: 18px 5px;
+    gap: 6px;
+    padding: 8px 0;
   }
   .parks {
-    gap: 6px;
+    gap: 5px;
   }
   .parks button {
-    padding: 8px 11px;
+    min-width: 36px;
   }
   .hint {
     margin-left: auto;
+    padding: 8px 10px;
+    font-size: 12px;
   }
   footer p {
     flex-basis: 100%;
-    order: 3;
-    font-size: 12px;
+    order: 1;
+    line-height: 1.3;
+  }
+  footer small {
+    margin-top: 2px;
   }
   .notice {
-    margin: 10px 12px 0;
     font-size: 12px;
   }
-  .complete {
-    order: 4;
-    width: 100%;
-    text-align: center;
+  .notice button {
+    min-height: 36px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
