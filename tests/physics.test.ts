@@ -10,6 +10,7 @@ import {
   simulate,
   step,
 } from "../src/physics.ts";
+
 test("fixed-step Planck simulation reaches actual landing on all five parks", () => {
   for (const p of makeParks()) {
     const r = simulate(p, p.solution.angle, p.solution.strength);
@@ -21,16 +22,21 @@ test("fixed-step Planck simulation reaches actual landing on all five parks", ()
     assert.equal(r.collected.size, 3);
   }
 });
+
 test("identical controls yield identical trajectories and scores", () => {
   const p = makeParks()[0];
+
   const a = simulate(p, 24, 14),
     b = simulate(p, 24, 14);
+
   assert.equal(a.time, b.time);
   assert.deepEqual(a.trail, b.trail);
 });
+
 test("bad line misses rather than falsely completing", () => {
   assert.equal(simulate(makeParks()[0], 70, 8).status, "missed");
 });
+
 test("rings use swept distance so fast frames cannot tunnel", () => {
   assert.equal(
     pointSegmentDistance({ x: 5, y: 1 }, { x: 0, y: 1 }, { x: 10, y: 1 }),
@@ -41,6 +47,7 @@ test("rings use swept distance so fast frames cannot tunnel", () => {
     5,
   );
 });
+
 test("launch validation and ready state guard reject corrupt input", () => {
   const r = createRun(basePark(0));
   assert.throws(() => launch(r, NaN, 14));
@@ -50,12 +57,14 @@ test("launch validation and ready state guard reject corrupt input", () => {
   launch(r, 32, 16);
   assert.equal(r.puck.getLinearVelocity().x, v.x);
 });
+
 test("finished simulations stop mutating", () => {
   const r = simulate(makeParks()[0], 24, 14);
   const t = r.time;
   step(r);
   assert.equal(r.time, t);
 });
+
 test("progress restore validates schema and every saved score", () => {
   assert.deepEqual(readProgress(null), {});
   assert.throws(() => readProgress("bad"));

@@ -1,7 +1,10 @@
 import { World, Vec2, Circle, Edge } from "planck";
 import type { Body } from "planck";
+
 export type XY = { x: number; y: number };
+
 export type Line = { a: XY; b: XY; color: "ramp" | "floor"; friction?: number };
+
 export type Park = {
   id: number;
   name: string;
@@ -12,7 +15,9 @@ export type Park = {
   solution: { angle: number; strength: number };
   description: string;
 };
+
 export type Status = "ready" | "rolling" | "landed" | "missed";
+
 export type Run = {
   world: World;
   puck: Body;
@@ -24,6 +29,7 @@ export type Run = {
   rest: number;
   previous: XY;
 };
+
 const line = (
   ax: number,
   ay: number,
@@ -32,6 +38,7 @@ const line = (
   color: "ramp" | "floor" = "ramp",
   friction = 0.2,
 ): Line => ({ a: { x: ax, y: ay }, b: { x: bx, y: by }, color, friction });
+
 export function basePark(id: number): Park {
   const variants = [
     { angle: 24, strength: 14, gravity: 7.5 },
@@ -40,8 +47,11 @@ export function basePark(id: number): Park {
     { angle: 36, strength: 13.4, gravity: 8.5 },
     { angle: 40, strength: 13.6, gravity: 9 },
   ];
+
   const v = variants[id];
+
   if (!v) throw new Error("Unknown park.");
+
   return {
     id,
     name: [
@@ -76,25 +86,30 @@ export function basePark(id: number): Park {
     ][id],
   };
 }
+
 export function createRun(park: Park): Run {
   const world = new World(Vec2(0, -park.gravity));
   const ground = world.createBody();
+
   for (const l of park.lines)
     ground.createFixture(Edge(Vec2(l.a.x, l.a.y), Vec2(l.b.x, l.b.y)), {
       friction: l.friction ?? 0.2,
       restitution: 0.03,
     });
+
   const puck = world.createDynamicBody({
     position: Vec2(2, 1.45),
     bullet: true,
     linearDamping: 0.025,
     angularDamping: 0.3,
   });
+
   puck.createFixture(Circle(0.28), {
     density: 1,
     friction: 0.14,
     restitution: 0.05,
   });
+
   return {
     world,
     puck,
@@ -107,8 +122,10 @@ export function createRun(park: Park): Run {
     previous: { x: 2, y: 1.45 },
   };
 }
+
 export function launch(run: Run, angle: number, strength: number) {
   if (run.status !== "ready") return;
+
   if (
     !Number.isFinite(angle) ||
     !Number.isFinite(strength) ||
@@ -124,15 +141,20 @@ export function launch(run: Run, angle: number, strength: number) {
   );
   run.status = "rolling";
 }
+
 export function pointSegmentDistance(p: XY, a: XY, b: XY) {
   const dx = b.x - a.x,
     dy = b.y - a.y;
+
   const d = dx * dx + dy * dy;
+
   const t = d
     ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / d))
     : 0;
+
   return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
 }
+
 export function step(run: Run) {
   if (run.status !== "rolling") return;
   const dt = 1 / 120;
@@ -144,31 +166,42 @@ export function step(run: Run) {
     if (pointSegmentDistance(r, run.previous, pos) < 0.65) run.collected.add(i);
   });
   run.previous = pos;
+
   if (Math.round(run.time / dt) % 4 === 0) {
     run.trail.push(pos);
+
     if (run.trail.length > 400) run.trail.shift();
   }
+
   const g = run.park.goal;
+
   const inGoal =
     p.x >= g.left && p.x <= g.right && p.y >= g.bottom && p.y <= g.top;
+
   if (inGoal) {
     const v = run.puck.getLinearVelocity();
     run.puck.setLinearVelocity(Vec2(v.x * 0.985, v.y));
     const speed = run.puck.getLinearVelocity().length();
+
     if (speed < 1.5) run.rest += dt;
     else run.rest = 0;
   } else run.rest = 0;
+
   if (run.rest >= 0.3 && run.collected.size === run.park.rings.length)
     run.status = "landed";
   else if (p.y < -4 || p.x < -4 || p.x > 34 || run.time > 12)
     run.status = "missed";
 }
+
 export function simulate(park: Park, angle: number, strength: number) {
   const run = createRun(park);
   launch(run, angle, strength);
+
   for (let i = 0; i < 1442 && run.status === "rolling"; i++) step(run);
+
   return run;
 }
+
 // Place rings on a measured canonical trajectory. Alternate launches still use real physics.
 export function makeParks(): Park[] {
   return Array.from({ length: 5 }, (_, i) => {
@@ -180,40 +213,53 @@ export function makeParks(): Park[] {
         Math.abs(b.x - x) < Math.abs(a.x - x) ? b : a,
       ),
     );
+
     return p;
   });
 }
-export function readProgress(
-  text: string | null,
-): Record<number, { angle: number; strength: number; time: number }> {
-  if (!text) return {};
+
+type ProgressEntry = { angle: number; strength: number; time: number };
+
+type Progress = Record<number, ProgressEntry>;
+
+function isObject(value: unknown): value is object {
+  return value !== null && typeof value === "object";
+}
+
+function isProgressEntry(value: unknown): value is ProgressEntry {
+  return (
+    isObject(value) &&
+    "angle" in value &&
+    "strength" in value &&
+    "time" in value &&
+    Number.isFinite(value.angle) &&
+    Number.isFinite(value.strength) &&
+    Number.isFinite(value.time) &&
+    Number(value.angle) >= 5 &&
+    Number(value.angle) <= 70 &&
+    Number(value.strength) >= 8 &&
+    Number(value.strength) <= 22 &&
+    Number(value.time) > 0 &&
+    Number(value.time) <= 12
+  );
+}
+
+export function readProgress(text: string | null) {
+  const best: Progress = {};
+
+  if (!text) return best;
   const parsed = JSON.parse(text);
-  if (parsed.version !== 1 || !parsed.best || typeof parsed.best !== "object")
+
+  if (parsed.version !== 1 || !isObject(parsed.best))
     throw new Error("Saved progress is unreadable.");
-  const best: Record<
-    number,
-    { angle: number; strength: number; time: number }
-  > = {};
-  for (const [k, v] of Object.entries(parsed.best)) {
-    const id = Number(k),
-      p = v as { angle: number; strength: number; time: number };
-    if (
-      !Number.isInteger(id) ||
-      id < 0 ||
-      id > 4 ||
-      !p ||
-      !Number.isFinite(p.angle) ||
-      !Number.isFinite(p.strength) ||
-      !Number.isFinite(p.time) ||
-      p.angle < 5 ||
-      p.angle > 70 ||
-      p.strength < 8 ||
-      p.strength > 22 ||
-      p.time <= 0 ||
-      p.time > 12
-    )
+
+  for (const [key, entry] of Object.entries(parsed.best)) {
+    const id = Number(key);
+
+    if (!Number.isInteger(id) || id < 0 || id > 4 || !isProgressEntry(entry))
       throw new Error("Invalid saved record.");
-    best[id] = p;
+    best[id] = entry;
   }
+
   return best;
 }

@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Playfield } from "./Playfield";
 import type { Report } from "./Playfield";
 import { makeParks, readProgress } from "./physics";
+
 const STORE = "pocket-park.best.v1";
+
 function initial() {
   try {
     return { best: readProgress(localStorage.getItem(STORE)), notice: "" };
@@ -14,6 +16,7 @@ function initial() {
     };
   }
 }
+
 export default function App() {
   const parks = useMemo(makeParks, []);
   const [boot] = useState(initial);
@@ -22,16 +25,20 @@ export default function App() {
   const [level, setLevel] = useState(0);
   const [angle, setAngle] = useState(24);
   const [strength, setStrength] = useState(12);
+
   const [history, setHistory] = useState<{ angle: number; strength: number }[]>(
     [],
   );
+
   const [attempt, setAttempt] = useState(0);
   const [paused, setPaused] = useState(false);
+
   const [state, setState] = useState<Report>({
     status: "ready",
     rings: 0,
     time: 0,
   });
+
   const park = parks[level];
   const running = state.status === "rolling";
   useEffect(() => {
@@ -43,6 +50,7 @@ export default function App() {
       );
     }
   }, [best]);
+
   function report(r: Report) {
     setState((prev) =>
       prev.status === r.status &&
@@ -51,19 +59,23 @@ export default function App() {
         ? prev
         : r,
     );
+
     if (r.status === "landed")
       setBest((old) => {
         const current = old[level];
+
         return current && current.time <= r.time
           ? old
           : { ...old, [level]: { angle, strength, time: r.time } };
       });
   }
+
   function reset() {
     setAttempt(0);
     setPaused(false);
     setState({ status: "ready", rings: 0, time: 0 });
   }
+
   function tweak(a: number, s: number) {
     if (running) return;
     setHistory((h) => [...h.slice(-19), { angle, strength }]);
@@ -71,6 +83,7 @@ export default function App() {
     setStrength(s);
     reset();
   }
+
   function changePark(n: number) {
     setLevel(n);
     setAngle(24);
@@ -79,20 +92,30 @@ export default function App() {
     reset();
     setNotice("");
   }
+
   function take() {
     setPaused(false);
     setAttempt((a) => a + 1);
     setState({ status: "rolling", rings: 0, time: 0 });
   }
+
   function key(e: React.KeyboardEvent) {
-    if ((e.target as HTMLElement).matches("input,select,button")) return;
+    if (
+      e.target instanceof HTMLElement &&
+      e.target.matches("input,select,button")
+    )
+      return;
+
     if (e.code === "Space") {
       e.preventDefault();
+
       if (!running) take();
       else setPaused((p) => !p);
     }
+
     if (e.key === "Escape") reset();
   }
+
   const message =
     state.status === "landed"
       ? "Lovely line. Every ring, a soft landing."
@@ -103,6 +126,7 @@ export default function App() {
             ? "Take a breath. Your line is paused."
             : "Let it roll. Watch the landing."
           : "Collect every ring and land softly in the bowl.";
+
   return (
     <div className="game" onKeyDown={key} tabIndex={-1}>
       <header>
@@ -204,6 +228,7 @@ export default function App() {
               disabled={!history.length || running}
               onClick={() => {
                 const p = history.at(-1);
+
                 if (p) {
                   setAngle(p.angle);
                   setStrength(p.strength);
