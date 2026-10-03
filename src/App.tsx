@@ -136,14 +136,16 @@ export default function App() {
         </div>
       )}
       <main>
-        <Playfield
-          park={park}
-          angle={angle}
-          strength={strength}
-          attempt={attempt}
-          paused={paused}
-          onReport={report}
-        />
+        <div className="scene">
+          <Playfield
+            park={park}
+            angle={angle}
+            strength={strength}
+            attempt={attempt}
+            paused={paused}
+            onReport={report}
+          />
+        </div>
         <div className="controls">
           <label>
             Launch angle <strong>{angle}°</strong>
