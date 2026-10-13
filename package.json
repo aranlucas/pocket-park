@@ -22,12 +22,12 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@aranlucas/oxlint-plugin-anti-slop": "0.1.0",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "typescript": "7.0.2",
-    "vite": "8.3.2",
     "oxlint": "1.86.0",
-    "@oxlint/plugins": "1.86.0",
-    "portless": "0.15.7"
+    "portless": "0.15.7",
+    "typescript": "7.0.2",
+    "vite": "8.3.2"
   }
 }
