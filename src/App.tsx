@@ -61,13 +61,13 @@ export default function App() {
     );
 
     if (r.status === "landed")
-      setBest((old) => {
+      {setBest((old) => {
         const current = old[level];
 
         return current && current.time <= r.time
           ? old
           : { ...old, [level]: { angle, strength, time: r.time } };
-      });
+      });}
   }
 
   function reset() {
@@ -77,7 +77,8 @@ export default function App() {
   }
 
   function tweak(a: number, s: number) {
-    if (running) return;
+    if (running) {return;}
+
     setHistory((h) => [...h.slice(-19), { angle, strength }]);
     setAngle(a);
     setStrength(s);
@@ -104,16 +105,16 @@ export default function App() {
       e.target instanceof HTMLElement &&
       e.target.matches("input,select,button")
     )
-      return;
+      {return;}
 
     if (e.code === "Space") {
       e.preventDefault();
 
-      if (!running) take();
-      else setPaused((p) => !p);
+      if (!running) {take();}
+      else {setPaused((p) => !p);}
     }
 
-    if (e.key === "Escape") reset();
+    if (e.key === "Escape") {reset();}
   }
 
   const message =

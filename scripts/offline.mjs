@@ -3,12 +3,12 @@ import { createHash } from "node:crypto";
 
 const files = ["/", "/index.html", "/icon.svg", "/manifest.webmanifest"];
 
-for (const name of await readdir("dist/assets")) files.push("/assets/" + name);
+for (const name of await readdir("dist/assets")) {files.push("/assets/" + name);}
 
 const hash = createHash("sha256");
 
 for (const f of files.filter((f) => f !== "/"))
-  hash.update(await readFile("dist" + f));
+  {hash.update(await readFile("dist" + f));}
 
 const cache = "pocket-park" + "-" + hash.digest("hex").slice(0, 12);
 

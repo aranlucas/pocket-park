@@ -39,13 +39,13 @@ export function Playfield({
     const run = createRun(park);
     const preview = simulate(park, angle, strength).trail;
 
-    let id = 0,
-      last = 0,
-      accumulator = 0,
-      reported = -1;
+    let id = 0;
+      let last = 0;
+      let accumulator = 0;
+      let reported = -1;
 
-    if (attempt > 0) launch(run, angle, strength);
-    else report.current({ status: "ready", rings: 0, time: 0 });
+    if (attempt > 0) {launch(run, angle, strength);}
+    else {report.current({ status: "ready", rings: 0, time: 0 });}
 
     function frame(timestamp: number) {
       if (last && !stopped.current) {
@@ -66,7 +66,7 @@ export function Playfield({
       }
 
       if (run.status === "rolling" || stopped.current)
-        id = requestAnimationFrame(frame);
+        {id = requestAnimationFrame(frame);}
     }
 
     id = requestAnimationFrame(frame);

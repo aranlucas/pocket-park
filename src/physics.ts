@@ -50,7 +50,7 @@ export function basePark(id: number): Park {
 
   const v = variants[id];
 
-  if (!v) throw new Error("Unknown park.");
+  if (!v) {throw new Error("Unknown park.");}
 
   return {
     id,
@@ -92,10 +92,10 @@ export function createRun(park: Park): Run {
   const ground = world.createBody();
 
   for (const l of park.lines)
-    ground.createFixture(Edge(Vec2(l.a.x, l.a.y), Vec2(l.b.x, l.b.y)), {
+    {ground.createFixture(Edge(Vec2(l.a.x, l.a.y), Vec2(l.b.x, l.b.y)), {
       friction: l.friction ?? 0.2,
       restitution: 0.03,
-    });
+    });}
 
   const puck = world.createDynamicBody({
     position: Vec2(2, 1.45),
@@ -124,7 +124,7 @@ export function createRun(park: Park): Run {
 }
 
 export function launch(run: Run, angle: number, strength: number) {
-  if (run.status !== "ready") return;
+  if (run.status !== "ready") {return;}
 
   if (
     !Number.isFinite(angle) ||
@@ -134,7 +134,8 @@ export function launch(run: Run, angle: number, strength: number) {
     strength < 8 ||
     strength > 22
   )
-    throw new Error("Launch angle or strength is outside the playable range.");
+    {throw new Error("Launch angle or strength is outside the playable range.");}
+
   const rad = (angle * Math.PI) / 180;
   run.puck.setLinearVelocity(
     Vec2(Math.cos(rad) * strength, Math.sin(rad) * strength),
@@ -143,8 +144,8 @@ export function launch(run: Run, angle: number, strength: number) {
 }
 
 export function pointSegmentDistance(p: XY, a: XY, b: XY) {
-  const dx = b.x - a.x,
-    dy = b.y - a.y;
+  const dx = b.x - a.x;
+    const dy = b.y - a.y;
 
   const d = dx * dx + dy * dy;
 
@@ -156,21 +157,22 @@ export function pointSegmentDistance(p: XY, a: XY, b: XY) {
 }
 
 export function step(run: Run) {
-  if (run.status !== "rolling") return;
+  if (run.status !== "rolling") {return;}
+
   const dt = 1 / 120;
   run.world.step(dt, 8, 3);
   run.time += dt;
   const p = run.puck.getPosition();
   const pos = { x: p.x, y: p.y };
   run.park.rings.forEach((r, i) => {
-    if (pointSegmentDistance(r, run.previous, pos) < 0.65) run.collected.add(i);
+    if (pointSegmentDistance(r, run.previous, pos) < 0.65) {run.collected.add(i);}
   });
   run.previous = pos;
 
   if (Math.round(run.time / dt) % 4 === 0) {
     run.trail.push(pos);
 
-    if (run.trail.length > 400) run.trail.shift();
+    if (run.trail.length > 400) {run.trail.shift();}
   }
 
   const g = run.park.goal;
@@ -183,21 +185,21 @@ export function step(run: Run) {
     run.puck.setLinearVelocity(Vec2(v.x * 0.985, v.y));
     const speed = run.puck.getLinearVelocity().length();
 
-    if (speed < 1.5) run.rest += dt;
-    else run.rest = 0;
-  } else run.rest = 0;
+    if (speed < 1.5) {run.rest += dt;}
+    else {run.rest = 0;}
+  } else {run.rest = 0;}
 
   if (run.rest >= 0.3 && run.collected.size === run.park.rings.length)
-    run.status = "landed";
+    {run.status = "landed";}
   else if (p.y < -4 || p.x < -4 || p.x > 34 || run.time > 12)
-    run.status = "missed";
+    {run.status = "missed";}
 }
 
 export function simulate(park: Park, angle: number, strength: number) {
   const run = createRun(park);
   launch(run, angle, strength);
 
-  for (let i = 0; i < 1442 && run.status === "rolling"; i++) step(run);
+  for (let i = 0; i < 1442 && run.status === "rolling"; i++) {step(run);}
 
   return run;
 }
@@ -247,17 +249,19 @@ function isProgressEntry(value: unknown): value is ProgressEntry {
 export function readProgress(text: string | null) {
   const best: Progress = {};
 
-  if (!text) return best;
+  if (!text) {return best;}
+
   const parsed = JSON.parse(text);
 
   if (parsed.version !== 1 || !isObject(parsed.best))
-    throw new Error("Saved progress is unreadable.");
+    {throw new Error("Saved progress is unreadable.");}
 
   for (const [key, entry] of Object.entries(parsed.best)) {
     const id = Number(key);
 
     if (!Number.isInteger(id) || id < 0 || id > 4 || !isProgressEntry(entry))
-      throw new Error("Invalid saved record.");
+      {throw new Error("Invalid saved record.");}
+
     best[id] = entry;
   }
 

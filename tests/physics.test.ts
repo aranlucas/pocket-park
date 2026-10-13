@@ -26,8 +26,8 @@ test("fixed-step Planck simulation reaches actual landing on all five parks", ()
 test("identical controls yield identical trajectories and scores", () => {
   const p = makeParks()[0];
 
-  const a = simulate(p, 24, 14),
-    b = simulate(p, 24, 14);
+  const a = simulate(p, 24, 14);
+    const b = simulate(p, 24, 14);
 
   assert.equal(a.time, b.time);
   assert.deepEqual(a.trail, b.trail);
