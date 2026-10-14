@@ -3,14 +3,21 @@ import { createHash } from "node:crypto";
 
 const files = ["/", "/index.html", "/icon.svg", "/manifest.webmanifest"];
 
-for (const name of await readdir("dist/assets")) {files.push("/assets/" + name);}
+for (const name of await readdir("dist/assets")) {
+  files.push("/assets/" + name);
+}
 
 const hash = createHash("sha256");
 
-for (const f of files.filter((f) => f !== "/"))
-  {hash.update(await readFile("dist" + f));}
+const fileContents = await Promise.all(
+  files.flatMap((file) => (file === "/" ? [] : [readFile("dist" + file)])),
+);
 
-const cache = "pocket-park" + "-" + hash.digest("hex").slice(0, 12);
+for (const content of fileContents) {
+  hash.update(content);
+}
+
+const cache = "pocket-park-" + hash.digest("hex").slice(0, 12);
 
 await writeFile(
   "dist/sw.js",

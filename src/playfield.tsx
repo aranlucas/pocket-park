@@ -5,6 +5,15 @@ import { render } from "./renderer";
 
 export type Report = { status: Status; rings: number; time: number };
 
+interface PlayfieldProps {
+  readonly park: Park;
+  readonly angle: number;
+  readonly strength: number;
+  readonly attempt: number;
+  readonly paused: boolean;
+  readonly onReport: (r: Report) => void;
+}
+
 export function Playfield({
   park,
   angle,
@@ -12,14 +21,7 @@ export function Playfield({
   attempt,
   paused,
   onReport,
-}: {
-  park: Park;
-  angle: number;
-  strength: number;
-  attempt: number;
-  paused: boolean;
-  onReport: (r: Report) => void;
-}) {
+}: PlayfieldProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const report = useRef(onReport);
   const stopped = useRef(paused);
@@ -58,7 +60,10 @@ export function Playfield({
       }
 
       last = timestamp;
-      render(ctx!, run, run.status === "ready" ? preview : []);
+
+      if (ctx) {
+        render(ctx, run, run.status === "ready" ? preview : []);
+      }
 
       if (run.collected.size !== reported || run.status !== "rolling") {
         reported = run.collected.size;

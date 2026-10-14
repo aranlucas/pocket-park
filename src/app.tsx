@@ -1,34 +1,44 @@
-import { useEffect, useMemo, useState } from "react";
-import { Playfield } from "./Playfield";
-import type { Report } from "./Playfield";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Playfield } from "./playfield";
+import type { Report } from "./playfield";
 import { makeParks, readProgress } from "./physics";
 
 const STORE = "pocket-park.best.v1";
 
-function initial() {
+interface HistoryEntry {
+  angle: number;
+  strength: number;
+}
+
+type Progress = Record<number, { angle: number; strength: number; time: number }>;
+
+interface InitialState {
+  best: Progress;
+  notice: string;
+}
+
+function initial(): InitialState {
   try {
-    return { best: readProgress(localStorage.getItem(STORE)), notice: "" };
+    return { best: readProgress(localStorage.getItem(STORE)), notice: "" } satisfies InitialState;
   } catch {
     return {
       best: {},
       notice:
         "Saved records were unreadable. Your parks are ready for a fresh line.",
-    };
+    } satisfies InitialState;
   }
 }
 
 export default function App() {
-  const parks = useMemo(makeParks, []);
+  const parks = useMemo(() => makeParks(), []);
   const [boot] = useState(initial);
-  const [best, setBest] = useState(boot.best);
+  const [best, setBest] = useState<Progress>(boot.best);
   const [notice, setNotice] = useState(boot.notice);
   const [level, setLevel] = useState(0);
   const [angle, setAngle] = useState(24);
   const [strength, setStrength] = useState(12);
 
-  const [history, setHistory] = useState<{ angle: number; strength: number }[]>(
-    [],
-  );
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   const [attempt, setAttempt] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -41,10 +51,18 @@ export default function App() {
 
   const park = parks[level];
   const running = state.status === "rolling";
+  const noticeRef = useRef(notice);
+  
+  useEffect(() => {
+    noticeRef.current = notice;
+  }, [notice]);
+
   useEffect(() => {
     try {
       localStorage.setItem(STORE, JSON.stringify({ version: 1, best }));
     } catch {
+      noticeRef.current =
+        "Browser storage is unavailable. Records last for this visit only.";
       setNotice(
         "Browser storage is unavailable. Records last for this visit only.",
       );
@@ -60,14 +78,15 @@ export default function App() {
         : r,
     );
 
-    if (r.status === "landed")
-      {setBest((old) => {
+    if (r.status === "landed") {
+      setBest((old) => {
         const current = old[level];
 
         return current && current.time <= r.time
           ? old
           : { ...old, [level]: { angle, strength, time: r.time } };
-      });}
+      });
+    }
   }
 
   function reset() {
@@ -129,7 +148,7 @@ export default function App() {
           : "Collect every ring and land softly in the bowl.";
 
   return (
-    <div className="game" onKeyDown={key} tabIndex={-1}>
+    <div className="game" onKeyDown={key} tabIndex={-1} role="application">
       <header>
         <h1>
           Pocket Park
@@ -155,7 +174,7 @@ export default function App() {
       {notice && (
         <div className="notice" role="status">
           {notice}
-          <button aria-label="Dismiss message" onClick={() => setNotice("")}>
+          <button type="button" aria-label="Dismiss message" onClick={() => setNotice("")}>
             ×
           </button>
         </div>
@@ -205,7 +224,7 @@ export default function App() {
               <span>Bold</span>
             </div>
           </label>
-          <button className="take" onClick={take} disabled={running}>
+          <button type="button" className="take" onClick={take} disabled={running}>
             Take the line{" "}
             <svg
               viewBox="0 0 24 24"
@@ -219,13 +238,14 @@ export default function App() {
             </svg>
           </button>
           <div className="secondary">
-            <button onClick={running ? () => setPaused((p) => !p) : reset}>
+            <button type="button" onClick={running ? () => setPaused((p) => !p) : reset}>
               {running ? (paused ? "Resume" : "Pause") : "Reset"}
             </button>
-            <button onClick={reset} disabled={!running}>
+            <button type="button" onClick={reset} disabled={!running}>
               Restart
             </button>
             <button
+              type="button"
               disabled={!history.length || running}
               onClick={() => {
                 const p = history.at(-1);
@@ -270,7 +290,7 @@ export default function App() {
             Best: {best[level] ? `${best[level].time.toFixed(2)}s` : "—"}
           </span>
           {state.status === "landed" && level < 4 && (
-            <button className="next" onClick={() => changePark(level + 1)}>
+            <button type="button" className="next" onClick={() => changePark(level + 1)}>
               Next park
             </button>
           )}
@@ -282,6 +302,7 @@ export default function App() {
           <div className="parks" aria-label="Choose park">
             {parks.map((p, i) => (
               <button
+                type="button"
                 key={p.id}
                 aria-label={`Park ${i + 1}: ${p.name}`}
                 aria-pressed={level === i}
@@ -301,6 +322,7 @@ export default function App() {
             </small>
           </p>
           <button
+            type="button"
             className="hint"
             disabled={running}
             onClick={() => {

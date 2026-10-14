@@ -97,13 +97,16 @@ export function render(
   ctx.lineWidth = 1.5;
   ctx.setLineDash(run.trail.length ? [] : [5, 6]);
   ctx.beginPath();
-  path.forEach((p, i) =>
-    i ? ctx.lineTo(x(p.x), y(p.y)) : ctx.moveTo(x(p.x), y(p.y)),
-  );
+
+  for (const [i, p] of path.entries()) {
+    i ? ctx.lineTo(x(p.x), y(p.y)) : ctx.moveTo(x(p.x), y(p.y));
+  }
+
   ctx.stroke();
   ctx.setLineDash([]);
   ctx.globalAlpha = 1;
-  run.park.rings.forEach((r, i) => {
+
+  for (const [i, r] of run.park.rings.entries()) {
     const done = run.collected.has(i);
       const cx = x(r.x);
       const cy = y(r.y);
@@ -115,7 +118,7 @@ export function render(
     ctx.stroke();
     ctx.fillStyle = done ? "#fff2c6" : "#a5d5be";
     star(ctx, cx, cy, 8);
-  });
+  }
 
   const goalX = x(24);
     const goalY = y(0.75);

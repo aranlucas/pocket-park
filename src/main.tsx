@@ -1,10 +1,16 @@
 import "@fontsource/fraunces/latin-700.css";
 import React from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App";
+import App from "./app";
 import "./styles.css";
 
-createRoot(document.querySelector("#root")!).render(
+const rootElement = document.querySelector("#root");
+
+if (!rootElement) {
+  throw new Error("Root element not found");
+}
+
+createRoot(rootElement).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
