@@ -23,8 +23,7 @@ function initial(): InitialState {
   } catch {
     return {
       best: {},
-      notice:
-        "Saved records were unreadable. Your parks are ready for a fresh line.",
+      notice: "Saved records were unreadable. Your parks are ready for a fresh line.",
     } satisfies InitialState;
   }
 }
@@ -62,11 +61,7 @@ export default function App() {
 
   function report(r: Report) {
     setState((prev) =>
-      prev.status === r.status &&
-      prev.rings === r.rings &&
-      r.status === "rolling"
-        ? prev
-        : r,
+      prev.status === r.status && prev.rings === r.rings && r.status === "rolling" ? prev : r,
     );
 
     if (r.status === "landed") {
@@ -87,7 +82,9 @@ export default function App() {
   }
 
   function tweak(a: number, s: number) {
-    if (running) {return;}
+    if (running) {
+      return;
+    }
 
     setHistory((h) => [...h.slice(-19), { angle, strength }]);
     setAngle(a);
@@ -111,20 +108,23 @@ export default function App() {
   }
 
   function key(e: React.KeyboardEvent) {
-    if (
-      e.target instanceof HTMLElement &&
-      e.target.matches("input,select,button")
-    )
-      {return;}
+    if (e.target instanceof HTMLElement && e.target.matches("input,select,button")) {
+      return;
+    }
 
     if (e.code === "Space") {
       e.preventDefault();
 
-      if (!running) {take();}
-      else {setPaused((p) => !p);}
+      if (!running) {
+        take();
+      } else {
+        setPaused((p) => !p);
+      }
     }
 
-    if (e.key === "Escape") {reset();}
+    if (e.key === "Escape") {
+      reset();
+    }
   }
 
   const message =
@@ -253,15 +253,8 @@ export default function App() {
             </button>
           </div>
         </div>
-        <div
-          className={`result ${state.status === "landed" ? "landed" : ""}`}
-          role="status"
-        >
-          <span
-            className="rings"
-            role="img"
-            aria-label={`${state.rings} of 3 rings collected`}
-          >
+        <div className={`result ${state.status === "landed" ? "landed" : ""}`} role="status">
+          <span className="rings" role="img" aria-label={`${state.rings} of 3 rings collected`}>
             {[0, 1, 2].map((i) => (
               <svg
                 key={i}
@@ -308,8 +301,7 @@ export default function App() {
           <p>
             {park.description}
             <small>
-              Space to launch / pause · Esc to reset · dotted line previews real
-              physics
+              Space to launch / pause · Esc to reset · dotted line previews real physics
             </small>
           </p>
           <button

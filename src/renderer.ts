@@ -2,18 +2,13 @@ import type { Run, XY } from "./physics";
 
 const W = 960;
 
-  const H = 450;
+const H = 450;
 
 const x = (p: number) => (p + 1) * 30;
 
-  const y = (p: number) => H - 85 - p * 30;
+const y = (p: number) => H - 85 - p * 30;
 
-function star(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  r: number,
-) {
+function star(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
   ctx.beginPath();
 
   for (let i = 0; i < 10; i++) {
@@ -21,21 +16,20 @@ function star(
     const radius = i % 2 ? r * 0.45 : r;
 
     const px = cx + Math.cos(a) * radius;
-      const py = cy + Math.sin(a) * radius;
+    const py = cy + Math.sin(a) * radius;
 
-    if (i) {ctx.lineTo(px, py);}
-    else {ctx.moveTo(px, py);}
+    if (i) {
+      ctx.lineTo(px, py);
+    } else {
+      ctx.moveTo(px, py);
+    }
   }
 
   ctx.closePath();
   ctx.fill();
 }
 
-export function render(
-  ctx: CanvasRenderingContext2D,
-  run: Run,
-  preview: XY[] = [],
-) {
+export function render(ctx: CanvasRenderingContext2D, run: Run, preview: XY[] = []) {
   ctx.clearRect(0, 0, W, H);
   ctx.fillStyle = "#443678";
   ctx.fillRect(0, 0, W, H);
@@ -55,7 +49,7 @@ export function render(
 
   for (let i = 0; i < 26; i++) {
     const cx = (i * 127 + 31) % W;
-      const cy = (i * 83 + 11) % 230;
+    const cy = (i * 83 + 11) % 230;
 
     ctx.beginPath();
     ctx.arc(cx, cy, i % 4 === 0 ? 2 : 1, 0, Math.PI * 2);
@@ -66,7 +60,9 @@ export function render(
   ctx.beginPath();
   ctx.moveTo(0, H);
 
-  for (let i = 0; i < 17; i++) {ctx.lineTo(i * 64, 295 - (i % 3) * 22);}
+  for (let i = 0; i < 17; i++) {
+    ctx.lineTo(i * 64, 295 - (i % 3) * 22);
+  }
 
   ctx.lineTo(W, H);
   ctx.closePath();
@@ -112,8 +108,8 @@ export function render(
 
   for (const [i, r] of run.park.rings.entries()) {
     const done = run.collected.has(i);
-      const cx = x(r.x);
-      const cy = y(r.y);
+    const cx = x(r.x);
+    const cy = y(r.y);
 
     ctx.strokeStyle = done ? "#fff2c6" : "#a5d5be";
     ctx.lineWidth = 3;
@@ -125,7 +121,7 @@ export function render(
   }
 
   const goalX = x(24);
-    const goalY = y(0.75);
+  const goalY = y(0.75);
 
   ctx.strokeStyle = "#d7ccef";
   ctx.lineWidth = 1.5;
@@ -154,8 +150,8 @@ export function render(
   ctx.fill();
 
   const p = run.puck.getPosition();
-    const cx = x(p.x);
-    const cy = y(p.y);
+  const cx = x(p.x);
+  const cy = y(p.y);
 
   ctx.save();
   ctx.translate(cx, cy);
