@@ -22,7 +22,10 @@ const hash = createHash("sha256");
 async function getFileContents() {
   const results = await Promise.all(
     files.map(async (file) => {
-      if (file === "/") return null;
+      if (file === "/") {
+        return null;
+      }
+
       try {
         return await readFile("dist" + file);
       } catch {
@@ -30,6 +33,7 @@ async function getFileContents() {
       }
     }),
   );
+
   return results.filter((r) => r !== null);
 }
 

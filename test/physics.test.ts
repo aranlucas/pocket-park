@@ -8,7 +8,7 @@ import {
   readProgress,
   simulate,
   step,
-} from "../src/physics.ts";
+} from "@/physics.ts";
 
 describe("physics", () => {
   it("fixed-step Planck simulation reaches actual landing on all five parks", () => {
@@ -34,12 +34,8 @@ describe("physics", () => {
   });
 
   it("rings use swept distance so fast frames cannot tunnel", () => {
-    expect(
-      pointSegmentDistance({ x: 5, y: 1 }, { x: 0, y: 1 }, { x: 10, y: 1 }),
-    ).toBe(0);
-    expect(
-      pointSegmentDistance({ x: 15, y: 1 }, { x: 0, y: 1 }, { x: 10, y: 1 }),
-    ).toBe(5);
+    expect(pointSegmentDistance({ x: 5, y: 1 }, { x: 0, y: 1 }, { x: 10, y: 1 })).toBe(0);
+    expect(pointSegmentDistance({ x: 15, y: 1 }, { x: 0, y: 1 }, { x: 10, y: 1 })).toBe(5);
   });
 
   it("launch validation and ready state guard reject corrupt input", () => {
@@ -63,14 +59,10 @@ describe("physics", () => {
     expect(readProgress(null)).toEqual({});
     expect(() => readProgress("bad")).toThrow();
     expect(() =>
-      readProgress(
-        '{"version":1,"best":{"6":{"angle":24,"strength":14,"time":2}}}',
-      ),
+      readProgress('{"version":1,"best":{"6":{"angle":24,"strength":14,"time":2}}}'),
     ).toThrow();
-    expect(
-      readProgress(
-        '{"version":1,"best":{"0":{"angle":24,"strength":14,"time":2}}}',
-      ),
-    ).toEqual({ 0: { angle: 24, strength: 14, time: 2 } });
+    expect(readProgress('{"version":1,"best":{"0":{"angle":24,"strength":14,"time":2}}}')).toEqual({
+      0: { angle: 24, strength: 14, time: 2 },
+    });
   });
 });
