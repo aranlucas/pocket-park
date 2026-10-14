@@ -99,7 +99,11 @@ export function render(
   ctx.beginPath();
 
   for (const [i, p] of path.entries()) {
-    i ? ctx.lineTo(x(p.x), y(p.y)) : ctx.moveTo(x(p.x), y(p.y));
+    if (i) {
+      ctx.lineTo(x(p.x), y(p.y));
+    } else {
+      ctx.moveTo(x(p.x), y(p.y));
+    }
   }
 
   ctx.stroke();

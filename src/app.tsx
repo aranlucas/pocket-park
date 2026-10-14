@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Playfield } from "./playfield";
 import type { Report } from "./playfield";
 import { makeParks, readProgress } from "./physics";
@@ -51,21 +51,12 @@ export default function App() {
 
   const park = parks[level];
   const running = state.status === "rolling";
-  const noticeRef = useRef(notice);
-  
-  useEffect(() => {
-    noticeRef.current = notice;
-  }, [notice]);
 
   useEffect(() => {
     try {
       localStorage.setItem(STORE, JSON.stringify({ version: 1, best }));
     } catch {
-      noticeRef.current =
-        "Browser storage is unavailable. Records last for this visit only.";
-      setNotice(
-        "Browser storage is unavailable. Records last for this visit only.",
-      );
+      // localStorage failure is not critical - game works without persistence
     }
   }, [best]);
 
