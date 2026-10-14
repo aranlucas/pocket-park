@@ -256,7 +256,7 @@ export function readProgress(text: string | null) {
 
   if (!text) {return best;}
 
-  const parsed = JSON.parse(text);
+  const parsed: unknown = JSON.parse(text);
 
   const result = parsedProgressSchema.safeParse(parsed);
 
