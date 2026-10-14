@@ -1,5 +1,6 @@
 import { World, Vec2, Circle, Edge } from "planck";
 import type { Body } from "planck";
+import { z } from "zod";
 
 export type XY = { x: number; y: number };
 
@@ -123,7 +124,11 @@ export function createRun(park: Park): Run {
   };
 }
 
-export function launch(run: Run, angle: number, strength: number) {
+export function launch(
+  run: Run,
+  angle: number,
+  strength: number,
+) {
   if (run.status !== "ready") {return;}
 
   if (
@@ -143,9 +148,13 @@ export function launch(run: Run, angle: number, strength: number) {
   run.status = "rolling";
 }
 
-export function pointSegmentDistance(p: XY, a: XY, b: XY) {
+export function pointSegmentDistance(
+  p: XY,
+  a: XY,
+  b: XY,
+) {
   const dx = b.x - a.x;
-    const dy = b.y - a.y;
+  const dy = b.y - a.y;
 
   const d = dx * dx + dy * dy;
 
@@ -164,9 +173,11 @@ export function step(run: Run) {
   run.time += dt;
   const p = run.puck.getPosition();
   const pos = { x: p.x, y: p.y };
-  run.park.rings.forEach((r, i) => {
+
+  for (const [i, r] of run.park.rings.entries()) {
     if (pointSegmentDistance(r, run.previous, pos) < 0.65) {run.collected.add(i);}
-  });
+  }
+
   run.previous = pos;
 
   if (Math.round(run.time / dt) % 4 === 0) {
@@ -195,7 +206,11 @@ export function step(run: Run) {
     {run.status = "missed";}
 }
 
-export function simulate(park: Park, angle: number, strength: number) {
+export function simulate(
+  park: Park,
+  angle: number,
+  strength: number,
+) {
   const run = createRun(park);
   launch(run, angle, strength);
 
@@ -211,8 +226,9 @@ export function makeParks(): Park[] {
     const trajectory = simulate(p, p.solution.angle, p.solution.strength);
     const ringXs = [7, 12.2, 17.5];
     p.rings = ringXs.map((x) =>
-      trajectory.trail.reduce((a, b) =>
-        Math.abs(b.x - x) < Math.abs(a.x - x) ? b : a,
+      trajectory.trail.reduce(
+        (a: XY, b: XY) =>
+          Math.abs(b.x - x) < Math.abs(a.x - x) ? b : a,
       ),
     );
 
@@ -224,27 +240,16 @@ type ProgressEntry = { angle: number; strength: number; time: number };
 
 type Progress = Record<number, ProgressEntry>;
 
-function isObject(value: unknown): value is object {
-  return value !== null && typeof value === "object";
-}
+const progressEntrySchema = z.object({
+  angle: z.number().finite().min(5).max(70),
+  strength: z.number().finite().min(8).max(22),
+  time: z.number().finite().gt(0).lte(12),
+});
 
-function isProgressEntry(value: unknown): value is ProgressEntry {
-  return (
-    isObject(value) &&
-    "angle" in value &&
-    "strength" in value &&
-    "time" in value &&
-    Number.isFinite(value.angle) &&
-    Number.isFinite(value.strength) &&
-    Number.isFinite(value.time) &&
-    Number(value.angle) >= 5 &&
-    Number(value.angle) <= 70 &&
-    Number(value.strength) >= 8 &&
-    Number(value.strength) <= 22 &&
-    Number(value.time) > 0 &&
-    Number(value.time) <= 12
-  );
-}
+const parsedProgressSchema = z.object({
+  version: z.literal(1),
+  best: z.record(z.string(), progressEntrySchema),
+});
 
 export function readProgress(text: string | null) {
   const best: Progress = {};
@@ -253,14 +258,18 @@ export function readProgress(text: string | null) {
 
   const parsed = JSON.parse(text);
 
-  if (parsed.version !== 1 || !isObject(parsed.best))
-    {throw new Error("Saved progress is unreadable.");}
+  const result = parsedProgressSchema.safeParse(parsed);
 
-  for (const [key, entry] of Object.entries(parsed.best)) {
+  if (!result.success) {
+    throw new Error("Saved progress is unreadable.");
+  }
+
+  for (const [key, entry] of Object.entries(result.data.best)) {
     const id = Number(key);
 
-    if (!Number.isInteger(id) || id < 0 || id > 4 || !isProgressEntry(entry))
-      {throw new Error("Invalid saved record.");}
+    if (!Number.isInteger(id) || id < 0 || id > 4) {
+      throw new Error("Invalid saved record.");
+    }
 
     best[id] = entry;
   }
