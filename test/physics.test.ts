@@ -40,8 +40,12 @@ describe("physics", () => {
 
   it("launch validation and ready state guard reject corrupt input", () => {
     const r = createRun(basePark(0));
-    expect(() => launch(r, NaN, 14)).toThrow();
-    expect(() => launch(r, 90, 14)).toThrow();
+    expect(() => launch(r, NaN, 14)).toThrow(
+      "Launch angle or strength is outside the playable range.",
+    );
+    expect(() => launch(r, 90, 14)).toThrow(
+      "Launch angle or strength is outside the playable range.",
+    );
     launch(r, 24, 14);
     const v = r.puck.getLinearVelocity().clone();
     launch(r, 32, 16);
@@ -57,10 +61,10 @@ describe("physics", () => {
 
   it("progress restore validates schema and every saved score", () => {
     expect(readProgress(null)).toEqual({});
-    expect(() => readProgress("bad")).toThrow();
+    expect(() => readProgress("bad")).toThrow(/Unexpected token.*not valid JSON/);
     expect(() =>
       readProgress('{"version":1,"best":{"6":{"angle":24,"strength":14,"time":2}}}'),
-    ).toThrow();
+    ).toThrow("Invalid saved record.");
     expect(readProgress('{"version":1,"best":{"0":{"angle":24,"strength":14,"time":2}}}')).toEqual({
       0: { angle: 24, strength: 14, time: 2 },
     });
