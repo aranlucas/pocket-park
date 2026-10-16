@@ -6,18 +6,18 @@ One push, three rings, a soft landing. A tiny momentum puzzle with five parks an
 
 Adjust launch angle and push, inspect the dotted physical preview, then Take the line. Collect all rings and rest in the bowl. Pause, restart, undo a tweak, or use a reference hint; try another park and keep a local best time.
 
-Requires **Node 24+** and npm. No account, key, model download or external service is needed.
+Requires **Node 24+** and pnpm. No account, key, model download or external service is needed.
 
 ```sh
-npm ci --ignore-scripts
-npm run dev
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm run dev
 ```
 
-Open **https://pocket-park.localhost**. `npm run dev` runs through [Portless](https://github.com/vercel-labs/portless) (a dev dependency); its first run may ask for `sudo` to bind port 443 and trust a local certificate. For a production/offline check:
+Open **https://pocket-park.localhost**. `pnpm run dev` runs through [Portless](https://github.com/vercel-labs/portless) (a dev dependency); its first run may ask for `sudo` to bind port 443 and trust a local certificate. For a production/offline check:
 
 ```sh
-npm run check
-npm run preview
+pnpm run check
+pnpm run preview
 ```
 
 The production build includes a versioned service worker. After the first successful online/local-server load and activation, the bundled app can reopen without a network connection at that origin. Browser storage, file and codec support still apply. Dev mode does not install the offline cache.
@@ -36,7 +36,7 @@ Local browser storage failures produce a recovery message. Saved progress is val
 
 ## Verification
 
-`npm run check` runs meaningful core tests, strict TypeScript checks and a production build. CI repeats these on Node 24 and audits production dependencies. Runtime pins and the lockfile make installs reproducible; lifecycle scripts are disabled. Desktop/mobile browser evidence and interaction notes are recorded in the implementation PR.
+`pnpm run check` runs meaningful core tests, strict TypeScript checks and a production build. CI repeats these on Node 24 and audits production dependencies. Runtime pins and the lockfile make installs reproducible; lifecycle scripts are disabled. Desktop/mobile browser evidence and interaction notes are recorded in the implementation PR.
 
 ## Deployment configuration
 
