@@ -48,6 +48,6 @@ Local browser storage failures produce a recovery message. Saved progress is val
 - Domain modules in `src/`: pure calculations / media / physical rules.
 - Rendering components and `styles.css`: native interface and responsive layout.
 - `tests/`: core behavior and input-boundary regression tests.
-- `scripts/offline.mjs`: build-specific cache manifest.
+- `vite.config.ts`: `vite-plugin-pwa` generates the Workbox service worker that precaches the build.
 
 See `PRODUCT.md`, `DESIGN.md`, `DEPENDENCIES.md` and `SECURITY.md` for the UI coordinator and future reviewers.
