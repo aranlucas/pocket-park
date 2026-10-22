@@ -40,7 +40,9 @@ Local browser storage failures produce a recovery message. Saved progress is val
 
 ## Deployment configuration
 
-`wrangler.toml` targets Cloudflare static assets; `railway.json` describes a Vite preview process. Both are **configuration only**. Nothing has been provisioned or deployed. Hosting requires a separate decision about access and provider terms.
+The live app is hosted on [Vercel](https://pocket-park.vercel.app). `wrangler.toml` and `railway.json` remain optional deployment configurations; neither provisions infrastructure.
+
+Railway uses Railpack to detect pnpm from `packageManager` in `package.json`. Its build command is `pnpm install --frozen-lockfile && pnpm build`; its start command is `pnpm run preview --host 0.0.0.0 --port $PORT`, with `/` as the health check. See [Railway build and start commands](https://docs.railway.com/builds/build-and-start-commands) and [Railpack Node package manager detection](https://railpack.com/languages/node/#package-managers).
 
 ## Code map
 
