@@ -10,7 +10,6 @@ export default defineConfig({
       workbox: {
         cacheId: "pocket-park",
         globPatterns: ["**/*"],
-        globIgnores: ["_headers"],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
