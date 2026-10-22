@@ -40,9 +40,7 @@ Local browser storage failures produce a recovery message. Saved progress is val
 
 ## Deployment configuration
 
-The live app is hosted on [Vercel](https://pocket-park.vercel.app). `wrangler.toml` and `railway.json` remain optional deployment configurations; neither provisions infrastructure.
-
-Railway uses Railpack to detect pnpm from `packageManager` in `package.json`. Its build command is `pnpm install --frozen-lockfile && pnpm build`; its start command is `pnpm run preview --host 0.0.0.0 --port $PORT`, with `/` as the health check. See [Railway build and start commands](https://docs.railway.com/builds/build-and-start-commands) and [Railpack Node package manager detection](https://railpack.com/languages/node/#package-managers).
+The live app is hosted on [Vercel](https://pocket-park.vercel.app), the sole deployment target. Vercel builds the Vite app with `pnpm build` and serves `dist/`. Security headers are configured in `vercel.json` using [Vercel's native headers configuration](https://vercel.com/docs/project-configuration/vercel-json#headers).
 
 ## Code map
 
