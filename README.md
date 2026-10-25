@@ -36,7 +36,7 @@ Local browser storage failures produce a recovery message. Saved progress is val
 
 ## Verification
 
-`pnpm run check` runs meaningful core tests, strict TypeScript checks and a production build. CI repeats these on Node 24 and audits production dependencies. Runtime pins and the lockfile make installs reproducible; lifecycle scripts are disabled. Desktop/mobile browser evidence and interaction notes are recorded in the implementation PR.
+`pnpm run check` runs lint, core Vitest tests, strict TypeScript checks and a production build. CI also runs `pnpm format:check` on Node 24. Runtime pins and the lockfile make installs reproducible; lifecycle scripts are disabled. Desktop/mobile browser evidence and interaction notes are recorded in the implementation PR.
 
 ## Deployment configuration
 
@@ -44,10 +44,10 @@ The live app is hosted on [Vercel](https://pocket-park.vercel.app), the sole dep
 
 ## Code map
 
-- `src/App.tsx`: state composition and user workflow.
+- `src/app.tsx`: state composition and user workflow.
 - Domain modules in `src/`: pure calculations / media / physical rules.
 - Rendering components and `styles.css`: native interface and responsive layout.
-- `tests/`: core behavior and input-boundary regression tests.
+- `test/`: core behavior and input-boundary regression tests.
 - `vite.config.ts`: `vite-plugin-pwa` generates the Workbox service worker that precaches the build.
 
 See `PRODUCT.md`, `DESIGN.md`, `DEPENDENCIES.md` and `SECURITY.md` for the UI coordinator and future reviewers.
