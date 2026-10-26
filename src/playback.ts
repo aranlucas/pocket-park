@@ -4,7 +4,9 @@ import type { Run, Status } from "./physics";
 export type Report = { status: Status; rings: number; time: number };
 
 export interface Playback {
+  /** Suspend/resume the owned frame without counting paused wall time as simulation time. */
   setPaused(paused: boolean): void;
+  /** Cancel the owned frame permanently. Safe to call repeatedly. */
   dispose(): void;
 }
 

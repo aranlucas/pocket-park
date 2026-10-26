@@ -16,6 +16,7 @@ interface PlayfieldProps {
   readonly onReport: (r: Report) => void;
 }
 
+/** Bind one canvas/run lifecycle to controls; report status/ring changes and final time. */
 export function Playfield({ park, angle, strength, attempt, paused, onReport }: PlayfieldProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const report = useRef(onReport);
