@@ -26,7 +26,7 @@ Adjust launch angle and push, inspect the dotted physical preview, then Take the
 
 This is an abstract puck game, not a realistic skating simulator. Five compact parks share a family of ramps but vary gravity, obstacles and ring trajectories. Ring placement is derived from verified canonical trajectories; hints intentionally reveal those controls. Best times and undo state are local, no global leaderboard. Physics advances at 120 Hz; rendering caps catch-up after hidden-tab stalls. No audio, gamepad or replay export in this prototype.
 
-No keys, paid infrastructure, private uploads, cloud AI calls or unrelated repository changes. Keep source private.
+No keys, paid infrastructure, private uploads, cloud AI calls or unrelated repository changes. Local-first describes where game scores are stored; it does not establish repository visibility.
 
 ## Evidence on Hand
 
@@ -36,5 +36,5 @@ Synthetic demos, meaningful unit tests, source/release/license checks on 2 Octob
 
 - Make one useful interaction immediately available.
 - Keep user data on the device.
-- Show uncertainty and codec/input boundaries honestly.
+- Show simulation, storage and offline-support boundaries honestly.
 - Preserve undo and visible recovery.

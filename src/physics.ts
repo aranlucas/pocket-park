@@ -2,6 +2,9 @@ import { World, Vec2, Circle, Edge } from "planck";
 import type { Body } from "planck";
 import { z } from "zod";
 
+/** Simulation seconds per Planck step, shared by previews and live playback. */
+export const FIXED_TIME_STEP = 1 / 120;
+
 export type XY = { x: number; y: number };
 
 export type Line = { a: XY; b: XY; color: "ramp" | "floor"; friction?: number };
@@ -40,6 +43,7 @@ const line = (
   friction = 0.2,
 ): Line => ({ a: { x: ax, y: ay }, b: { x: bx, y: by }, color, friction });
 
+/** Create one of the five park layouts without rings. Throws for an unknown ID. */
 export function basePark(id: number): Park {
   const variants = [
     { angle: 24, strength: 14, gravity: 7.5 },
@@ -84,6 +88,7 @@ export function basePark(id: number): Park {
   };
 }
 
+/** Allocate an independent ready world and puck using the supplied park geometry. */
 export function createRun(park: Park): Run {
   const world = new World(Vec2(0, -park.gravity));
   const ground = world.createBody();
@@ -121,6 +126,7 @@ export function createRun(park: Park): Run {
   };
 }
 
+/** Launch a ready run; reject nonfinite/out-of-range controls and ignore repeat launches. */
 export function launch(run: Run, angle: number, strength: number) {
   if (run.status !== "ready") {
     return;
@@ -142,6 +148,7 @@ export function launch(run: Run, angle: number, strength: number) {
   run.status = "rolling";
 }
 
+/** Distance to the closest point on a closed segment, including a zero-length segment. */
 export function pointSegmentDistance(p: XY, a: XY, b: XY) {
   const dx = b.x - a.x;
   const dy = b.y - a.y;
@@ -153,17 +160,7 @@ export function pointSegmentDistance(p: XY, a: XY, b: XY) {
   return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
 }
 
-export function step(run: Run) {
-  if (run.status !== "rolling") {
-    return;
-  }
-
-  const dt = 1 / 120;
-  run.world.step(dt, 8, 3);
-  run.time += dt;
-  const p = run.puck.getPosition();
-  const pos = { x: p.x, y: p.y };
-
+function collectRings(run: Run, pos: XY) {
   for (const [i, r] of run.park.rings.entries()) {
     if (pointSegmentDistance(r, run.previous, pos) < 0.65) {
       run.collected.add(i);
@@ -171,40 +168,66 @@ export function step(run: Run) {
   }
 
   run.previous = pos;
+}
 
-  if (Math.round(run.time / dt) % 4 === 0) {
-    run.trail.push(pos);
-
-    if (run.trail.length > 400) {
-      run.trail.shift();
-    }
+function recordTrail(run: Run, pos: XY) {
+  if (Math.round(run.time / FIXED_TIME_STEP) % 4 !== 0) {
+    return;
   }
 
-  const g = run.park.goal;
+  run.trail.push(pos);
 
-  const inGoal = p.x >= g.left && p.x <= g.right && p.y >= g.bottom && p.y <= g.top;
-
-  if (inGoal) {
-    const v = run.puck.getLinearVelocity();
-    run.puck.setLinearVelocity(Vec2(v.x * 0.985, v.y));
-    const speed = run.puck.getLinearVelocity().length();
-
-    if (speed < 1.5) {
-      run.rest += dt;
-    } else {
-      run.rest = 0;
-    }
-  } else {
-    run.rest = 0;
-  }
-
-  if (run.rest >= 0.3 && run.collected.size === run.park.rings.length) {
-    run.status = "landed";
-  } else if (p.y < -4 || p.x < -4 || p.x > 34 || run.time > 12) {
-    run.status = "missed";
+  if (run.trail.length > 400) {
+    run.trail.shift();
   }
 }
 
+function isInGoal(p: XY, g: Park["goal"]) {
+  return p.x >= g.left && p.x <= g.right && p.y >= g.bottom && p.y <= g.top;
+}
+
+function updateRest(run: Run, pos: XY) {
+  if (!isInGoal(pos, run.park.goal)) {
+    run.rest = 0;
+
+    return;
+  }
+
+  const velocity = run.puck.getLinearVelocity();
+  run.puck.setLinearVelocity(Vec2(velocity.x * 0.985, velocity.y));
+  const speed = run.puck.getLinearVelocity().length();
+  run.rest = speed < 1.5 ? run.rest + FIXED_TIME_STEP : 0;
+}
+
+function statusAfterStep(run: Run, p: XY): Status {
+  if (run.rest >= 0.3 && run.collected.size === run.park.rings.length) {
+    return "landed";
+  }
+
+  if (p.y < -4 || p.x < -4 || p.x > 34 || run.time > 12) {
+    return "missed";
+  }
+
+  return "rolling";
+}
+
+/** Advance a rolling run by one fixed step, including collection, rest and terminal state. */
+export function step(run: Run) {
+  if (run.status !== "rolling") {
+    return;
+  }
+
+  run.world.step(FIXED_TIME_STEP, 8, 3);
+  run.time += FIXED_TIME_STEP;
+  const p = run.puck.getPosition();
+  const pos = { x: p.x, y: p.y };
+  collectRings(run, pos);
+  recordTrail(run, pos);
+  updateRest(run, pos);
+  run.status = statusAfterStep(run, pos);
+}
+
+/** Simulate a fresh launch synchronously until terminal state or the bounded step limit. */
 export function simulate(park: Park, angle: number, strength: number) {
   const run = createRun(park);
   launch(run, angle, strength);
@@ -216,7 +239,7 @@ export function simulate(park: Park, angle: number, strength: number) {
   return run;
 }
 
-// Place rings on a measured canonical trajectory. Alternate launches still use real physics.
+/** Derive three rings per park from its canonical trajectory; return independent layouts. */
 export function makeParks(): Park[] {
   return Array.from({ length: 5 }, (_, i) => {
     const p = basePark(i);
@@ -230,9 +253,9 @@ export function makeParks(): Park[] {
   });
 }
 
-type ProgressEntry = { angle: number; strength: number; time: number };
+export type ProgressEntry = { angle: number; strength: number; time: number };
 
-type Progress = Record<number, ProgressEntry>;
+export type Progress = Record<number, ProgressEntry>;
 
 const progressEntrySchema = z.object({
   angle: z.number().finite().min(5).max(70),
@@ -245,6 +268,7 @@ const parsedProgressSchema = z.object({
   best: z.record(z.string(), progressEntrySchema),
 });
 
+/** Decode version-one local scores. Empty input returns no scores; invalid data throws. */
 export function readProgress(text: string | null) {
   const best: Progress = {};
 

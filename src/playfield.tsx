@@ -1,9 +1,11 @@
-import { useEffect, useRef } from "react";
-import { createRun, launch, simulate, step } from "./physics";
-import type { Park, Status } from "./physics";
+import { useEffect, useMemo, useRef } from "react";
+import { createRun, launch, simulate } from "./physics";
+import type { Park } from "./physics";
+import { startPlayback } from "./playback";
+import type { Playback, Report } from "./playback";
 import { render } from "./renderer";
 
-export type Report = { status: Status; rings: number; time: number };
+export type { Report } from "./playback";
 
 interface PlayfieldProps {
   readonly park: Park;
@@ -14,13 +16,17 @@ interface PlayfieldProps {
   readonly onReport: (r: Report) => void;
 }
 
+/** Bind one canvas/run lifecycle to controls; report status/ring changes and final time. */
 export function Playfield({ park, angle, strength, attempt, paused, onReport }: PlayfieldProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const report = useRef(onReport);
   const stopped = useRef(paused);
+  const playback = useRef<Playback | null>(null);
+  const preview = useMemo(() => simulate(park, angle, strength).trail, [park, angle, strength]);
   useEffect(() => {
     report.current = onReport;
     stopped.current = paused;
+    playback.current?.setPaused(paused);
   }, [onReport, paused]);
   useEffect(() => {
     const ctx = canvas.current?.getContext("2d");
@@ -32,49 +38,25 @@ export function Playfield({ park, angle, strength, attempt, paused, onReport }: 
     }
 
     const run = createRun(park);
-    const preview = simulate(park, angle, strength).trail;
-
-    let id = 0;
-    let last = 0;
-    let accumulator = 0;
-    let reported = -1;
 
     if (attempt > 0) {
       launch(run, angle, strength);
-    } else {
-      report.current({ status: "ready", rings: 0, time: 0 });
     }
 
-    function frame(timestamp: number) {
-      if (last && !stopped.current) {
-        accumulator += Math.min(0.05, (timestamp - last) / 1000);
+    const active = startPlayback(
+      run,
+      () => render(ctx, run, run.status === "ready" ? preview : []),
+      (value) => report.current(value),
+      stopped.current,
+    );
 
-        while (accumulator >= 1 / 120 && run.status === "rolling") {
-          step(run);
-          accumulator -= 1 / 120;
-        }
-      }
+    playback.current = active;
 
-      last = timestamp;
-
-      if (ctx) {
-        render(ctx, run, run.status === "ready" ? preview : []);
-      }
-
-      if (run.collected.size !== reported || run.status !== "rolling") {
-        reported = run.collected.size;
-        report.current({ status: run.status, rings: reported, time: run.time });
-      }
-
-      if (run.status === "rolling" || stopped.current) {
-        id = requestAnimationFrame(frame);
-      }
-    }
-
-    id = requestAnimationFrame(frame);
-
-    return () => cancelAnimationFrame(id);
-  }, [park, angle, strength, attempt]);
+    return () => {
+      active.dispose();
+      playback.current = null;
+    };
+  }, [park, angle, strength, attempt, preview]);
 
   return (
     <canvas

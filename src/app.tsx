@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Playfield } from "./playfield";
 import type { Report } from "./playfield";
 import { makeParks, readProgress } from "./physics";
+import type { Progress } from "./physics";
+import { RunResult } from "./run-result";
 
 const STORE = "pocket-park.best.v1";
 
@@ -9,8 +11,6 @@ interface HistoryEntry {
   angle: number;
   strength: number;
 }
-
-type Progress = Record<number, { angle: number; strength: number; time: number }>;
 
 interface InitialState {
   best: Progress;
@@ -127,17 +127,6 @@ export default function App() {
     }
   }
 
-  const message =
-    state.status === "landed"
-      ? "Lovely line. Every ring, a soft landing."
-      : state.status === "missed"
-        ? `A little off-line. ${state.rings} of 3 rings — tweak it and try again.`
-        : running
-          ? paused
-            ? "Take a breath. Your line is paused."
-            : "Let it roll. Watch the landing."
-          : "Collect every ring and land softly in the bowl.";
-
   return (
     <div className="game" onKeyDown={key} tabIndex={-1} role="application">
       <header>
@@ -253,35 +242,13 @@ export default function App() {
             </button>
           </div>
         </div>
-        <div className={`result ${state.status === "landed" ? "landed" : ""}`} role="status">
-          <span className="rings" role="img" aria-label={`${state.rings} of 3 rings collected`}>
-            {[0, 1, 2].map((i) => (
-              <svg
-                key={i}
-                viewBox="0 0 24 24"
-                width="23"
-                height="23"
-                fill={i < state.rings ? "#a5d5be" : "none"}
-                stroke="#a5d5be"
-                strokeWidth="1.7"
-              >
-                <path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" />
-              </svg>
-            ))}
-          </span>
-          <p>{message}</p>
-          <span className="best">
-            Best: {best[level] ? `${best[level].time.toFixed(2)}s` : "—"}
-          </span>
-          {state.status === "landed" && level < 4 && (
-            <button type="button" className="next" onClick={() => changePark(level + 1)}>
-              Next park
-            </button>
-          )}
-          {state.status === "landed" && level === 4 && (
-            <span className="complete">Five little adventures, complete.</span>
-          )}
-        </div>
+        <RunResult
+          state={state}
+          paused={paused}
+          level={level}
+          best={best[level]}
+          onNext={() => changePark(level + 1)}
+        />
         <footer>
           <div className="parks" aria-label="Choose park">
             {parks.map((p, i) => (

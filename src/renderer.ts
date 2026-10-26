@@ -29,7 +29,7 @@ function star(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) 
   ctx.fill();
 }
 
-export function render(ctx: CanvasRenderingContext2D, run: Run, preview: XY[] = []) {
+function drawBackground(ctx: CanvasRenderingContext2D) {
   ctx.clearRect(0, 0, W, H);
   ctx.fillStyle = "#443678";
   ctx.fillRect(0, 0, W, H);
@@ -67,7 +67,9 @@ export function render(ctx: CanvasRenderingContext2D, run: Run, preview: XY[] = 
   ctx.lineTo(W, H);
   ctx.closePath();
   ctx.fill();
+}
 
+function drawTerrain(ctx: CanvasRenderingContext2D, run: Run) {
   // These polygons depict the same line fixtures used by the simulation.
   for (const l of run.park.lines) {
     ctx.fillStyle = l.color === "ramp" ? "#817491" : "#948895";
@@ -86,7 +88,9 @@ export function render(ctx: CanvasRenderingContext2D, run: Run, preview: XY[] = 
     ctx.lineTo(x(l.b.x), y(l.b.y));
     ctx.stroke();
   }
+}
 
+function drawPath(ctx: CanvasRenderingContext2D, run: Run, preview: XY[]) {
   const path = run.trail.length ? run.trail : preview;
   ctx.strokeStyle = run.trail.length ? "#fff2c6" : "#b9aed0";
   ctx.globalAlpha = run.trail.length ? 0.7 : 0.5;
@@ -105,7 +109,9 @@ export function render(ctx: CanvasRenderingContext2D, run: Run, preview: XY[] = 
   ctx.stroke();
   ctx.setLineDash([]);
   ctx.globalAlpha = 1;
+}
 
+function drawRings(ctx: CanvasRenderingContext2D, run: Run) {
   for (const [i, r] of run.park.rings.entries()) {
     const done = run.collected.has(i);
     const cx = x(r.x);
@@ -119,7 +125,9 @@ export function render(ctx: CanvasRenderingContext2D, run: Run, preview: XY[] = 
     ctx.fillStyle = done ? "#fff2c6" : "#a5d5be";
     star(ctx, cx, cy, 8);
   }
+}
 
+function drawGoal(ctx: CanvasRenderingContext2D) {
   const goalX = x(24);
   const goalY = y(0.75);
 
@@ -148,7 +156,9 @@ export function render(ctx: CanvasRenderingContext2D, run: Run, preview: XY[] = 
   ctx.lineTo(x(28.5), y(4.4));
   ctx.closePath();
   ctx.fill();
+}
 
+function drawPuck(ctx: CanvasRenderingContext2D, run: Run) {
   const p = run.puck.getPosition();
   const cx = x(p.x);
   const cy = y(p.y);
@@ -178,4 +188,14 @@ export function render(ctx: CanvasRenderingContext2D, run: Run, preview: XY[] = 
   }
 
   ctx.restore();
+}
+
+/** Draw the current simulation geometry in stable background-to-puck order. */
+export function render(ctx: CanvasRenderingContext2D, run: Run, preview: XY[] = []) {
+  drawBackground(ctx);
+  drawTerrain(ctx, run);
+  drawPath(ctx, run, preview);
+  drawRings(ctx, run);
+  drawGoal(ctx);
+  drawPuck(ctx, run);
 }
