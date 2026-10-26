@@ -2,6 +2,8 @@ import { World, Vec2, Circle, Edge } from "planck";
 import type { Body } from "planck";
 import { z } from "zod";
 
+export const FIXED_TIME_STEP = 1 / 120;
+
 export type XY = { x: number; y: number };
 
 export type Line = { a: XY; b: XY; color: "ramp" | "floor"; friction?: number };
@@ -158,7 +160,7 @@ export function step(run: Run) {
     return;
   }
 
-  const dt = 1 / 120;
+  const dt = FIXED_TIME_STEP;
   run.world.step(dt, 8, 3);
   run.time += dt;
   const p = run.puck.getPosition();
