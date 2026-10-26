@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, render as renderUI } from "@testing-library/react";
+import { StrictMode } from "react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { World } from "planck";
 import { Playfield } from "@/playfield.tsx";
@@ -9,6 +10,7 @@ import { makeParks } from "@/physics.ts";
 const park = makeParks()[0];
 
 const frames = new Map<number, FrameRequestCallback>();
+const scheduled: FrameRequestCallback[] = [];
 
 let sequence = 0;
 
@@ -38,10 +40,12 @@ function canvasContext() {
 
 beforeEach(() => {
   frames.clear();
+  scheduled.length = 0;
   sequence = 0;
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
     const id = sequence++;
     frames.set(id, callback);
+    scheduled.push(callback);
 
     return id;
   });
@@ -170,5 +174,70 @@ test("unmount cancels the queued frame, including request ID zero", () => {
 
   expect(frames.has(0)).toBe(true);
   view.unmount();
+  expect(frames.size).toBe(0);
+});
+
+test("StrictMode replay owns one frame and disposed callbacks remain inert", () => {
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(canvasContext());
+  const steps = vi.spyOn(World.prototype, "step");
+  const onReport = vi.fn();
+
+  const view = renderUI(
+    <StrictMode>
+      <Playfield
+        park={park}
+        angle={24}
+        strength={14}
+        attempt={1}
+        paused={false}
+        onReport={onReport}
+      />
+    </StrictMode>,
+  );
+
+  expect(frames.size).toBe(1);
+  const before = steps.mock.calls.length;
+  frame(0);
+  frame(20);
+  expect(steps.mock.calls.length - before).toBe(2);
+  view.unmount();
+  const finalSteps = steps.mock.calls.length;
+  const finalReports = onReport.mock.calls.length;
+
+  for (const callback of scheduled) {
+    callback(1_000);
+  }
+
+  expect(steps).toHaveBeenCalledTimes(finalSteps);
+  expect(onReport).toHaveBeenCalledTimes(finalReports);
+  expect(frames.size).toBe(0);
+});
+
+test("callback replacement preserves playback and sends later reports to the current callback", () => {
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(canvasContext());
+  const steps = vi.spyOn(World.prototype, "step");
+  const first = vi.fn<(report: Report) => void>();
+  const latest = vi.fn<(report: Report) => void>();
+  const props = { park, angle: 24, strength: 14, attempt: 1, paused: false };
+  const view = renderUI(<Playfield {...props} onReport={first} />);
+  frame(0);
+  const before = steps.mock.calls.length;
+  const firstReports = first.mock.calls.length;
+  view.rerender(<Playfield {...props} onReport={latest} />);
+
+  expect(steps).toHaveBeenCalledTimes(before);
+  expect(latest).not.toHaveBeenCalled();
+  expect(frames.size).toBe(1);
+  frame(20);
+  expect(steps.mock.calls.length - before).toBe(2);
+
+  for (let timestamp = 36; timestamp <= 5_000 && frames.size > 0; timestamp += 16) {
+    frame(timestamp);
+  }
+
+  expect(first).toHaveBeenCalledTimes(firstReports);
+  const final = latest.mock.lastCall?.[0];
+  expect(final?.status).toBe("landed");
+  expect(final?.time).toBeCloseTo(2.583333333333327, 8);
   expect(frames.size).toBe(0);
 });

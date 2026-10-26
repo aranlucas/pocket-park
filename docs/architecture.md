@@ -66,7 +66,7 @@ pnpm peers check
 pnpm audit
 ```
 
-The 18 Vitest cases cover canonical wins, deterministic and failed launches, swept distance, invalid controls/progress, terminal immutability, preview reuse, pause/resume, catch-up bounds, final-time reporting, cancellation of frame ID zero and result/progression presentation. Component tests use actual React effects and Planck with a controlled animation clock. A bounded canvas recorder exercises drawing calls without claiming browser pixel correctness.
+The 20 Vitest cases cover canonical wins, deterministic and failed launches, swept distance, invalid controls/progress, terminal immutability, preview reuse, pause/resume, catch-up bounds, final-time reporting, cancellation of frame ID zero, StrictMode replay, callback replacement and result/progression presentation. Component tests use actual React effects and Planck with a controlled animation clock. A bounded canvas recorder exercises drawing calls without claiming browser pixel correctness.
 
 Prioritize these remaining tests and improvements:
 
