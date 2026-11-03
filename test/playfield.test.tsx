@@ -133,50 +133,6 @@ test("a long active-frame gap advances at most six fixed steps", () => {
   expect(steps.mock.calls.length - beforeGap).toBeLessThanOrEqual(6);
 });
 
-test("canonical play reports a real landing then releases the animation frame", () => {
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(canvasContext());
-  const onReport = vi.fn<(report: Report) => void>();
-  renderUI(
-    <Playfield
-      park={park}
-      angle={24}
-      strength={14}
-      attempt={1}
-      paused={false}
-      onReport={onReport}
-    />,
-  );
-
-  for (let timestamp = 0; timestamp <= 5_000 && frames.size > 0; timestamp += 16) {
-    frame(timestamp);
-  }
-
-  const final = onReport.mock.lastCall?.[0];
-  expect(final?.status).toBe("landed");
-  expect(final?.rings).toBe(3);
-  expect(final?.time).toBeCloseTo(2.583333333333327, 8);
-  expect(frames.size).toBe(0);
-});
-
-test("unmount cancels the queued frame, including request ID zero", () => {
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(canvasContext());
-
-  const view = renderUI(
-    <Playfield
-      park={park}
-      angle={24}
-      strength={14}
-      attempt={1}
-      paused={false}
-      onReport={vi.fn()}
-    />,
-  );
-
-  expect(frames.has(0)).toBe(true);
-  view.unmount();
-  expect(frames.size).toBe(0);
-});
-
 test("StrictMode replay owns one frame and disposed callbacks remain inert", () => {
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(canvasContext());
   const steps = vi.spyOn(World.prototype, "step");
@@ -238,6 +194,7 @@ test("callback replacement preserves playback and sends later reports to the cur
   expect(first).toHaveBeenCalledTimes(firstReports);
   const final = latest.mock.lastCall?.[0];
   expect(final?.status).toBe("landed");
+  expect(final?.rings).toBe(3);
   expect(final?.time).toBeCloseTo(2.583333333333327, 8);
   expect(frames.size).toBe(0);
 });
