@@ -1,10 +1,6 @@
 # Feature roadmap
 
-Planning baseline: `e236120a960e` on `origin/main`, 2026-10-26. Proposed game releases follow the higher-priority Digits/MCP work.
-
-## Outcome
-
-Make a small change to a launch, understand what it changed, and enjoy finding a better line. The [current game](README.md) already has five parks, a physical preview, reference hints, pause/restart, undo and local best times.
+Proposed 2026-10-26. Priorities are ordered below; acceptance criteria describe future behavior.
 
 ## 1. Compare the last two attempts
 
@@ -31,4 +27,4 @@ Add a few parks with distinct, verified physical solutions after the comparison 
 
 ## Boundaries
 
-No network leaderboard, accounts, analytics or generated level service is needed. Preserve the existing playback ownership and deterministic fixed-step behavior; use native tests for physics and lifecycle contracts. Value is a satisfying improvement the player understands, not the number of trajectories simulated or minutes spent.
+No network leaderboard, accounts, analytics or generated level service is needed. Preserve the [playback and physics contracts](docs/architecture.md). Value is a satisfying improvement the player understands, not the number of trajectories simulated or minutes spent.
