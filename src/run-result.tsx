@@ -1,14 +1,14 @@
 import type { Report } from "./playback";
-import type { ProgressEntry } from "./physics";
+import type { ProgressEntry } from "./progress";
 
 const settledMessages = {
   ready: "Collect every ring and land softly in the bowl.",
   landed: "Lovely line. Every ring, a soft landing.",
 };
 
-function statusMessage(state: Report, paused: boolean): string {
+function statusMessage(state: Report, paused: boolean, totalRings: number): string {
   if (state.status === "missed") {
-    return `A little off-line. ${state.rings} of 3 rings — tweak it and try again.`;
+    return `A little off-line. ${state.rings} of ${totalRings} rings — tweak it and try again.`;
   }
 
   if (state.status === "rolling") {
@@ -21,17 +21,21 @@ function statusMessage(state: Report, paused: boolean): string {
 interface RunResultProps {
   readonly state: Report;
   readonly paused: boolean;
-  readonly level: number;
+  readonly hasNext: boolean;
+  readonly totalRings: number;
   readonly best: ProgressEntry | undefined;
   readonly onNext: () => void;
 }
 
-/** Present run status and progression without owning physics or persistence state. */
-export function RunResult({ state, paused, level, best, onNext }: RunResultProps) {
+export function RunResult({ state, paused, hasNext, totalRings, best, onNext }: RunResultProps) {
   return (
     <div className={`result ${state.status === "landed" ? "landed" : ""}`} role="status">
-      <span className="rings" role="img" aria-label={`${state.rings} of 3 rings collected`}>
-        {[0, 1, 2].map((i) => (
+      <span
+        className="rings"
+        role="img"
+        aria-label={`${state.rings} of ${totalRings} rings collected`}
+      >
+        {Array.from({ length: totalRings }, (_, i) => (
           <svg
             key={i}
             viewBox="0 0 24 24"
@@ -45,15 +49,15 @@ export function RunResult({ state, paused, level, best, onNext }: RunResultProps
           </svg>
         ))}
       </span>
-      <p>{statusMessage(state, paused)}</p>
+      <p>{statusMessage(state, paused, totalRings)}</p>
       <span className="best">Best: {best ? `${best.time.toFixed(2)}s` : "—"}</span>
-      {state.status === "landed" && level < 4 && (
+      {state.status === "landed" && hasNext && (
         <button type="button" className="next" onClick={onNext}>
           Next park
         </button>
       )}
-      {state.status === "landed" && level === 4 && (
-        <span className="complete">Five little adventures, complete.</span>
+      {state.status === "landed" && !hasNext && (
+        <span className="complete">Every little adventure, complete.</span>
       )}
     </div>
   );

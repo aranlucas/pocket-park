@@ -1,14 +1,7 @@
+import { basePark } from "@/park-layouts.ts";
+import { makeParks } from "@/parks.ts";
 import { describe, it, expect } from "vitest";
-import {
-  basePark,
-  createRun,
-  launch,
-  makeParks,
-  pointSegmentDistance,
-  readProgress,
-  simulate,
-  step,
-} from "@/physics.ts";
+import { createRun, launch, pointSegmentDistance, simulate, step } from "@/physics.ts";
 
 describe("physics", () => {
   it("fixed-step Planck simulation reaches actual landing on all five parks", () => {
@@ -58,15 +51,15 @@ describe("physics", () => {
     step(r);
     expect(r.time).toBe(t);
   });
+});
 
-  it("progress restore validates schema and every saved score", () => {
-    expect(readProgress(null)).toEqual({});
-    expect(() => readProgress("bad")).toThrow(/Unexpected token.*not valid JSON/);
-    expect(() =>
-      readProgress('{"version":1,"best":{"6":{"angle":24,"strength":14,"time":2}}}'),
-    ).toThrow("Invalid saved record.");
-    expect(readProgress('{"version":1,"best":{"0":{"angle":24,"strength":14,"time":2}}}')).toEqual({
-      0: { angle: 24, strength: 14, time: 2 },
-    });
-  });
+it("editing a returned obstacle cannot change another park layout", () => {
+  const edited = basePark(2);
+  const original = basePark(2);
+
+  for (const line of edited.lines) {
+    line.a.x = 100;
+  }
+
+  expect(basePark(2)).toEqual(original);
 });

@@ -4,8 +4,8 @@ import { StrictMode } from "react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { World } from "planck";
 import { Playfield } from "@/playfield.tsx";
-import type { Report } from "@/playfield.tsx";
-import { makeParks } from "@/physics.ts";
+import type { Report } from "@/playback.ts";
+import { makeParks } from "@/parks.ts";
 
 const park = makeParks()[0];
 
