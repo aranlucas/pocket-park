@@ -58,7 +58,7 @@ test("holding Space launches once and pauses only on the next physical press", (
 test("Escape resets while the pause button retains focus", () => {
   render(<App />);
   fireEvent.click(screen.getByRole("button", { name: "Take the line" }));
-  const pause = screen.getByRole("button", { name: "Pause", exact: true });
+  const pause = screen.getByRole("button", { name: /^Pause$/ });
   pause.focus();
   fireEvent.click(pause);
   expect(screen.getByText("Take a breath. Your line is paused.")).toBeDefined();

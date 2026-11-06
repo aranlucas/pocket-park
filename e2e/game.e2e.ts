@@ -64,7 +64,7 @@ test("held Space preserves playback until a new press and Escape resets", async 
   screen,
 }) => {
   await app.open("/");
-  await screen.getByRole("application").focus();
+  await browser.locator('[role="application"]').focus();
   await browser.keyboard.down("Space");
   await browser.keyboard.down("Space");
   await expect(browser.locator(".result")).toContainText("Let it roll.");

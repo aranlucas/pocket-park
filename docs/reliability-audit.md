@@ -32,3 +32,5 @@ Independent static review identified another concrete keyboard failure: `App.key
 ## CI follow-up
 
 First CI run 42304931157 failed at lint before tests/build: native readable-spacing rules, prohibited module mocking in the new keyboard tests, and browser role queries belonging to the `screen` fixture. Corrected those queries to the supported fixture and replaced the Playfield mock with real App/Playfield effects, a canvas method recorder and a pending animation-frame stub. The regression assertions and pre-fix proof are retained. Independent final static review found no remaining worthwhile behavior objections. Validation remains CI-only.
+
+CI run 42305432807 passed lint/format and the corrected Vitest suite, then typechecking rejected two test query options: e2e does not enumerate the application role, and Testing Library does not accept `exact` in role options. Use an explicit role-attribute locator for game focus and an anchored accessible-name regex for Pause. No assertions removed. Browser and pre-fix evidence still await CI.
