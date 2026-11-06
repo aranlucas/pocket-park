@@ -5,7 +5,6 @@ test("hint, pause, landing and reload preserve a real best score", async ({
   app,
   browser,
   screen,
-  screen,
 }) => {
   await app.open("/");
   await screen.getByRole("button", { name: "Show a hint" }).click();
