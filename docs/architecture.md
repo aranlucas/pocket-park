@@ -4,9 +4,9 @@ Physics stays independent of React and browser storage so the same Planck simula
 
 ## Physics
 
-The exported types and signatures live in [src/physics.ts](../src/physics.ts). Integration relies on these contracts:
+Simulation lives in [src/physics.ts](../src/physics.ts); geometry types and the park catalog live in [src/park-layouts.ts](../src/park-layouts.ts). Shared playable bounds live in [src/rules.ts](../src/rules.ts). Integration relies on these contracts:
 
-- `basePark` returns a fresh layout without rings; `makeParks` derives rings from each canonical trajectory. Treat the supplied park geometry as immutable for the lifetime of a run: `createRun` retains it rather than cloning it.
+- `basePark` returns a fresh layout without rings; [makeParks](../src/parks.ts) derives rings from each canonical trajectory. Treat the supplied park geometry as immutable for the lifetime of a run: `createRun` retains it rather than cloning it.
 - `launch` accepts finite angles 5–70 and strengths 8–22. Invalid input throws only for a ready run; repeat launches are ignored.
 - `step` advances rolling runs at the shared 120 Hz fixed step. Ready and terminal runs do not mutate. `simulate` uses the same step and launch validation, with a bounded synchronous loop.
 - Ring collection uses distance to the swept segment between positions so fast movement cannot skip rings. Landing requires every ring and at least 0.3 seconds below speed 1.5 inside the goal. Leaving the goal or reaching that speed resets the rest timer. Landing takes precedence over a bounds/time failure on the same step.
@@ -21,7 +21,7 @@ The exported types and signatures live in [src/physics.ts](../src/physics.ts). I
 
 ## Persistence
 
-`readProgress` decodes version-one saved scores. Empty input returns no scores; malformed JSON, invalid schema or unknown park IDs throw for the UI to recover. Controls use the launch ranges; saved time must be finite, positive and at most 12 seconds. The UI replaces a best record only with a faster landed run.
+[readProgress](../src/progress.ts) decodes version-one saved scores. Empty input returns no scores; malformed JSON, invalid schema or unknown park IDs throw for the UI to recover. Controls use the launch ranges; saved time must be finite, positive and at most 12 seconds. The UI replaces a best record only with a faster landed run.
 
 Storage and offline failure behavior, including silent write/registration failures, is documented in [SECURITY.md](../SECURITY.md).
 

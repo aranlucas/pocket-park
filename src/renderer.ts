@@ -1,4 +1,5 @@
-import type { Run, XY } from "./physics";
+import type { Run } from "./physics";
+import type { XY } from "./park-layouts";
 
 const W = 960;
 
@@ -70,7 +71,6 @@ function drawBackground(ctx: CanvasRenderingContext2D) {
 }
 
 function drawTerrain(ctx: CanvasRenderingContext2D, run: Run) {
-  // These polygons depict the same line fixtures used by the simulation.
   for (const l of run.park.lines) {
     ctx.fillStyle = l.color === "ramp" ? "#817491" : "#948895";
     ctx.beginPath();
@@ -190,7 +190,6 @@ function drawPuck(ctx: CanvasRenderingContext2D, run: Run) {
   ctx.restore();
 }
 
-/** Draw the current simulation geometry in stable background-to-puck order. */
 export function render(ctx: CanvasRenderingContext2D, run: Run, preview: XY[] = []) {
   drawBackground(ctx);
   drawTerrain(ctx, run);

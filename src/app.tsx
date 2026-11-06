@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Playfield } from "./playfield";
-import type { Report } from "./playfield";
-import { makeParks, readProgress } from "./physics";
-import type { Progress } from "./physics";
+import type { Report } from "./playback";
+import { makeParks } from "./parks";
+import { PROGRESS_STORE, readProgress, writeProgress } from "./progress";
+import type { Progress } from "./progress";
+import { LAUNCH_ANGLE, PUSH_STRENGTH } from "./rules";
 import { RunResult } from "./run-result";
 
-const STORE = "pocket-park.best.v1";
+const DEFAULT_LAUNCH = { angle: 24, strength: 12 };
 
 interface HistoryEntry {
   angle: number;
@@ -19,7 +21,10 @@ interface InitialState {
 
 function initial(): InitialState {
   try {
-    return { best: readProgress(localStorage.getItem(STORE)), notice: "" } satisfies InitialState;
+    return {
+      best: readProgress(localStorage.getItem(PROGRESS_STORE)),
+      notice: "",
+    } satisfies InitialState;
   } catch {
     return {
       best: {},
@@ -34,8 +39,8 @@ export default function App() {
   const [best, setBest] = useState<Progress>(boot.best);
   const [notice, setNotice] = useState(boot.notice);
   const [level, setLevel] = useState(0);
-  const [angle, setAngle] = useState(24);
-  const [strength, setStrength] = useState(12);
+  const [angle, setAngle] = useState(DEFAULT_LAUNCH.angle);
+  const [strength, setStrength] = useState(DEFAULT_LAUNCH.strength);
 
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
@@ -53,7 +58,7 @@ export default function App() {
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORE, JSON.stringify({ version: 1, best }));
+      localStorage.setItem(PROGRESS_STORE, writeProgress(best));
     } catch {
       // localStorage failure is not critical - game works without persistence
     }
@@ -94,8 +99,8 @@ export default function App() {
 
   function changePark(n: number) {
     setLevel(n);
-    setAngle(24);
-    setStrength(12);
+    setAngle(DEFAULT_LAUNCH.angle);
+    setStrength(DEFAULT_LAUNCH.strength);
     setHistory([]);
     reset();
     setNotice("");
@@ -148,7 +153,7 @@ export default function App() {
         </h1>
         <p>One push. A whole little adventure.</p>
         <div className="park-heading">
-          Park {level + 1} of 5 <span>·</span> {park.name}
+          Park {level + 1} of {parks.length} <span>·</span> {park.name}
         </div>
       </header>
       {notice && (
@@ -176,15 +181,15 @@ export default function App() {
             <input
               aria-label="Launch angle"
               type="range"
-              min="5"
-              max="70"
+              min={LAUNCH_ANGLE.min}
+              max={LAUNCH_ANGLE.max}
               value={angle}
               disabled={running}
               onChange={(e) => tweak(Number(e.target.value), strength)}
             />
             <div>
-              <span>5°</span>
-              <span>70°</span>
+              <span>{LAUNCH_ANGLE.min}°</span>
+              <span>{LAUNCH_ANGLE.max}°</span>
             </div>
           </label>
           <label>
@@ -192,8 +197,8 @@ export default function App() {
             <input
               aria-label="Push strength"
               type="range"
-              min="8"
-              max="22"
+              min={PUSH_STRENGTH.min}
+              max={PUSH_STRENGTH.max}
               step=".1"
               value={strength}
               disabled={running}
@@ -245,7 +250,8 @@ export default function App() {
         <RunResult
           state={state}
           paused={paused}
-          level={level}
+          hasNext={level < parks.length - 1}
+          totalRings={park.rings.length}
           best={best[level]}
           onNext={() => changePark(level + 1)}
         />

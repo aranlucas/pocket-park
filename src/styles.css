@@ -47,8 +47,6 @@ input:focus-visible {
   background: var(--coral);
   color: var(--violet);
 }
-/* The scene yields space to the content, never the other way around.
-   Minimum tracks keep zoom/short windows readable and allow page scrolling. */
 .game {
   max-width: 1440px;
   height: 100vh;
@@ -417,10 +415,5 @@ footer small {
   }
   .notice button {
     min-height: 36px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  * {
-    scroll-behavior: auto;
   }
 }

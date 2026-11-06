@@ -31,7 +31,6 @@ function advance(run: Run, clock: Clock, timestamp: number): void {
   }
 }
 
-/** Drive one run with bounded fixed steps; paused and terminal runs own no animation frame. */
 export function startPlayback(
   run: Run,
   draw: () => void,

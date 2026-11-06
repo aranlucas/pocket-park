@@ -19,7 +19,8 @@ test.each<StatusCase>([
     <RunResult
       state={{ status, rings: 2, time: 1 }}
       paused={paused}
-      level={0}
+      hasNext={true}
+      totalRings={3}
       best={undefined}
       onNext={vi.fn()}
     />,
@@ -36,25 +37,61 @@ test("only a landed run offers the next park, and the last park shows completion
   const state = { status: "landed", rings: 3, time: 2.6 } as const;
 
   const view = render(
-    <RunResult state={state} paused={false} level={0} best={best} onNext={onNext} />,
+    <RunResult
+      state={state}
+      paused={false}
+      hasNext={true}
+      totalRings={3}
+      best={best}
+      onNext={onNext}
+    />,
   );
 
   expect(screen.getByText("Best: 2.58s")).toBeDefined();
   fireEvent.click(screen.getByRole("button", { name: "Next park" }));
   expect(onNext).toHaveBeenCalledOnce();
 
-  view.rerender(<RunResult state={state} paused={false} level={4} best={best} onNext={onNext} />);
-  expect(screen.queryByRole("button", { name: "Next park" })).toBeNull();
-  expect(screen.getByText("Five little adventures, complete.")).toBeDefined();
-
   view.rerender(
     <RunResult
-      state={{ ...state, status: "missed" }}
+      state={state}
       paused={false}
-      level={0}
+      hasNext={false}
+      totalRings={3}
       best={best}
       onNext={onNext}
     />,
   );
   expect(screen.queryByRole("button", { name: "Next park" })).toBeNull();
+  expect(screen.getByText("Every little adventure, complete.")).toBeDefined();
+
+  view.rerender(
+    <RunResult
+      state={{ ...state, status: "missed" }}
+      paused={false}
+      hasNext={true}
+      totalRings={3}
+      best={best}
+      onNext={onNext}
+    />,
+  );
+  expect(screen.queryByRole("button", { name: "Next park" })).toBeNull();
+});
+
+test("ring totals follow the active park", () => {
+  render(
+    <RunResult
+      state={{ status: "missed", rings: 1, time: 2 }}
+      paused={false}
+      hasNext={true}
+      totalRings={2}
+      best={undefined}
+      onNext={vi.fn()}
+    />,
+  );
+  expect(
+    screen.getByRole("img", { name: "1 of 2 rings collected" }).querySelectorAll("svg"),
+  ).toHaveLength(2);
+  expect(
+    screen.getByText("A little off-line. 1 of 2 rings — tweak it and try again."),
+  ).toBeDefined();
 });

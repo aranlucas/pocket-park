@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useRef } from "react";
 import { createRun, launch, simulate } from "./physics";
-import type { Park } from "./physics";
+import type { Park } from "./park-layouts";
 import { startPlayback } from "./playback";
 import type { Playback, Report } from "./playback";
 import { render } from "./renderer";
-
-export type { Report } from "./playback";
 
 interface PlayfieldProps {
   readonly park: Park;
@@ -16,7 +14,6 @@ interface PlayfieldProps {
   readonly onReport: (r: Report) => void;
 }
 
-/** Bind one canvas/run lifecycle to controls; report status/ring changes and final time. */
 export function Playfield({ park, angle, strength, attempt, paused, onReport }: PlayfieldProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const report = useRef(onReport);
@@ -65,7 +62,7 @@ export function Playfield({ park, angle, strength, attempt, paused, onReport }: 
       width="960"
       height="450"
       role="img"
-      aria-label={`Skatepark ${park.name}, three rings and a landing bowl. Adjust the launch and take the line using the controls below.`}
+      aria-label={`Skatepark ${park.name}, ${park.rings.length} rings and a landing bowl. Adjust the launch and take the line using the controls below.`}
     />
   );
 }
