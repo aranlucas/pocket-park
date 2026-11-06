@@ -6,7 +6,7 @@ Adjust launch angle and push, inspect the dotted physical preview, then Take the
 
 ## Local development
 
-Requires **Node 24+** and **pnpm 12.14.0** (see [package.json](package.json)). No account, key, model download or external service is needed.
+Requires **Node 24.8+** and **pnpm 12.14.0** (see [package.json](package.json)). No account, key, model download or external service is needed.
 
 ```sh
 pnpm install --frozen-lockfile --ignore-scripts
@@ -38,3 +38,5 @@ Planck supplies Box2D-derived collisions and fixed stepping without importing it
 - [Architecture and integration contracts](docs/architecture.md)
 - [Security boundaries, storage failures and reporting](SECURITY.md)
 - [Project license](LICENSE)
+
+CI also runs deterministic browser journeys with pinned `e2e` and `@e2e-dev/web` against the production preview. These tests require no model or credentials; reports and failure artifacts are uploaded as `reliability-evidence`. See [the behavior audit](docs/reliability-audit.md) for findings and coverage limits.

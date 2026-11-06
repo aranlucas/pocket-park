@@ -120,6 +120,10 @@ export default function App() {
     if (e.code === "Space") {
       e.preventDefault();
 
+      if (e.repeat) {
+        return;
+      }
+
       if (!running) {
         take();
       } else {
