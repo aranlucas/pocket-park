@@ -113,6 +113,11 @@ export default function App() {
   }
 
   function key(e: React.KeyboardEvent) {
+    if (e.key === "Escape") {
+      reset();
+      return;
+    }
+
     if (e.target instanceof HTMLElement && e.target.matches("input,select,button")) {
       return;
     }
@@ -129,10 +134,6 @@ export default function App() {
       } else {
         setPaused((p) => !p);
       }
-    }
-
-    if (e.key === "Escape") {
-      reset();
     }
   }
 

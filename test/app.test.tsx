@@ -23,3 +23,14 @@ test("holding Space launches once and pauses only on the next physical press", (
   fireEvent.keyDown(game, { code: "Space", repeat: true });
   expect(screen.getByText("Take a breath. Your line is paused.")).toBeDefined();
 });
+
+test("Escape resets while the pause button retains focus", () => {
+  render(<App />);
+  fireEvent.click(screen.getByRole("button", { name: "Take the line" }));
+  const pause = screen.getByRole("button", { name: "Pause", exact: true });
+  pause.focus();
+  fireEvent.click(pause);
+  expect(screen.getByText("Take a breath. Your line is paused.")).toBeDefined();
+  fireEvent.keyDown(pause, { key: "Escape", code: "Escape" });
+  expect(screen.getByText("Collect every ring and land softly in the bowl.")).toBeDefined();
+});

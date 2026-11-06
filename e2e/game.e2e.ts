@@ -67,6 +67,7 @@ test("held Space preserves playback until a new press and Escape resets", async 
   await browser.keyboard.down("Space");
   await expect(browser.locator(".result")).toContainText("Your line is paused.");
   await browser.keyboard.up("Space");
+  await browser.getByRole("button", { name: "Resume", exact: true }).focus();
   await browser.keyboard.press("Escape");
   await expect(browser.locator(".result")).toContainText("Collect every ring");
 });

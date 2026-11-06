@@ -24,3 +24,7 @@ The product is a static React/Vite canvas game: five selectable parks, launch co
 Keep existing Vitest, lint, format and build gates. Add deterministic real `e2e` / `@e2e-dev/web` tests against the built preview: hint → launch → pause/resume → all rings/landing → reload/best record; undo/reset/park navigation; direct last-park landing; malformed storage recovery. No model calls or credentials. Registry verified published e2e 0.23.0 and web 0.15.5; engines require Node ^22.22.3 or >=24.8.0. Read upstream quickstart/CI/GitHub Actions and Vite example, then installed package docs/types. Dependencies are requested by the user and chosen for their maintained browser engine and deterministic supported locators.
 
 Demonstrate the new defect assertions against the original two source files in an isolated CI checkout, requiring the expected named assertion failures; run the full corrected suite and production build in normal CI. Upload e2e reports/artifacts. CI results and independent review will be recorded after implementation. No local passing result is claimed.
+
+## Independent review findings
+
+Independent static review identified another concrete keyboard failure: `App.key` excludes buttons/inputs before Escape handling. Launch, click Pause, then press Escape while the Resume button retains focus: the advertised reset does nothing. Handle Escape before the native-control Space guard. Add a focused-button regression and include it in the pre-fix CI failure proof.

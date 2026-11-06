@@ -65,6 +65,7 @@ jobs:
           failures = [a['title'] for suite in report['testResults'] for a in suite['assertionResults'] if a['status'] == 'failed']
           assert sorted(failures) == sorted([
               'holding Space launches once and pauses only on the next physical press',
+              'Escape resets while the pause button retains focus',
               'only a landed run offers the next park, and the last park shows completion',
           ]), failures
           PYCODE
