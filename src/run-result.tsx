@@ -57,7 +57,7 @@ export function RunResult({ state, paused, hasNext, totalRings, best, onNext }: 
         </button>
       )}
       {state.status === "landed" && !hasNext && (
-        <span className="complete">Every little adventure, complete.</span>
+        <span className="complete">Last little adventure, complete.</span>
       )}
     </div>
   );

@@ -62,7 +62,7 @@ test("only a landed run offers the next park, and the last park shows completion
     />,
   );
   expect(screen.queryByRole("button", { name: "Next park" })).toBeNull();
-  expect(screen.getByText("Every little adventure, complete.")).toBeDefined();
+  expect(screen.getByText("Last little adventure, complete.")).toBeDefined();
 
   view.rerender(
     <RunResult

@@ -18,12 +18,17 @@ jobs:
   ci:
     if: ${{ github.event.pull_request.draft != true }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 26
 
       - name: Set up pnpm
         uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
@@ -39,3 +44,49 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+      - name: Prove regressions on the pre-fix source
+        env:
+          AUDIT_BASE: fd7a750ccd1c662d9add4163c8c3aa4fc91485b9
+        run: |
+          git fetch origin "$AUDIT_BASE" --depth=1
+          cp src/app.tsx /tmp/audit-app.tsx
+          cp src/run-result.tsx /tmp/audit-run-result.tsx
+          trap 'cp /tmp/audit-app.tsx src/app.tsx; cp /tmp/audit-run-result.tsx src/run-result.tsx' EXIT
+          git show "$AUDIT_BASE:src/app.tsx" > src/app.tsx
+          git show "$AUDIT_BASE:src/run-result.tsx" > src/run-result.tsx
+          if pnpm exec vitest run test/app.test.tsx test/run-result.test.tsx --reporter=json --outputFile=baseline-results.json; then
+            echo "Pre-fix regressions unexpectedly passed"
+            exit 1
+          fi
+          python3 - <<'PYCODE'
+          import json
+          report = json.load(open('baseline-results.json'))
+          failures = [a['title'] for suite in report['testResults'] for a in suite['assertionResults'] if a['status'] == 'failed']
+          assert sorted(failures) == sorted([
+              'holding Space launches once and pauses only on the next physical press',
+              'Escape resets while the pause button retains focus',
+              'only a landed run offers the next park, and the last park shows completion',
+          ]), failures
+          PYCODE
+
+      - name: Install Chromium
+        run: pnpm exec e2e-web install chromium --with-deps
+
+      - name: Browser journeys
+        run: pnpm exec e2e run --reporter list,junit
+        env:
+          E2E_TELEMETRY_DISABLED: "1"
+
+      - name: Upload regression evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: reliability-evidence
+          path: |
+            baseline-results.json
+            .e2e/report.json
+            .e2e/junit.xml
+            .e2e/results
+          include-hidden-files: true
+          retention-days: 7
