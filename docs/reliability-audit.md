@@ -28,3 +28,7 @@ Demonstrate the new defect assertions against the original two source files in a
 ## Independent review findings
 
 Independent static review identified another concrete keyboard failure: `App.key` excludes buttons/inputs before Escape handling. Launch, click Pause, then press Escape while the Resume button retains focus: the advertised reset does nothing. Handle Escape before the native-control Space guard. Add a focused-button regression and include it in the pre-fix CI failure proof.
+
+## CI follow-up
+
+First CI run 42304931157 failed at lint before tests/build: native readable-spacing rules, prohibited module mocking in the new keyboard tests, and browser role queries belonging to the `screen` fixture. Corrected those queries to the supported fixture and replaced the Playfield mock with real App/Playfield effects, a canvas method recorder and a pending animation-frame stub. The regression assertions and pre-fix proof are retained. Independent final static review found no remaining worthwhile behavior objections. Validation remains CI-only.

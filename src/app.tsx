@@ -115,6 +115,7 @@ export default function App() {
   function key(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
       reset();
+
       return;
     }
 
